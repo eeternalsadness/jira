@@ -4,7 +4,6 @@ on:
   push:
     tags:
       - v*.*.*
-  workflow_dispatch:
 
 env:
   GO_VERSION: "1.23.x"
@@ -26,4 +25,4 @@ jobs:
       - name: Build
         run: go build -v
       - name: "Publish module"
-        run: GOPROXY=proxy.golang.org go list -m github.com/eeternalsadness/jira@${{ github.ref }}
+        run: GOPROXY=proxy.golang.org go list -m github.com/eeternalsadness/jira@${GITHUB_REF#refs/tags/}
