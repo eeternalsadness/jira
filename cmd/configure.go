@@ -79,16 +79,20 @@ func configure() {
 	viper.Set("Token", token)
 
 	// configure default project id
-	fmt.Print("Enter the default project ID [12345]: ")
-	defaultProjectId, _ := reader.ReadString('\n')
-	defaultProjectId = defaultProjectId[:len(defaultProjectId)-1]
-	viper.Set("DefaultProjectId", defaultProjectId)
+	// fmt.Print("Enter the default project ID [12345]: ")
+	// defaultProjectId, _ := reader.ReadString('\n')
+	// defaultProjectId = defaultProjectId[:len(defaultProjectId)-1]
+	// viper.Set("DefaultProjectId", defaultProjectId)
+	// FIXME: set default for now, to think of a better way to use project id
+	viper.SetDefault("DefaultProjectId", "10140")
 
 	// configure jira email
-	fmt.Print("Enter the default issue type ID for the project [12345]: ")
-	defaultIssueTypeId, _ := reader.ReadString('\n')
-	defaultIssueTypeId = defaultIssueTypeId[:len(defaultIssueTypeId)-1]
-	viper.Set("DefaultIssueTypeId", defaultIssueTypeId)
+	// fmt.Print("Enter the default issue type ID for the project [12345]: ")
+	// defaultIssueTypeId, _ := reader.ReadString('\n')
+	// defaultIssueTypeId = defaultIssueTypeId[:len(defaultIssueTypeId)-1]
+	// viper.Set("DefaultIssueTypeId", defaultIssueTypeId)
+	// FIXME: set default for now, to think of a better way to use issue type id
+	viper.SetDefault("DefaultIssueTypeId", "10101")
 
 	viper.WriteConfigAs(fmt.Sprintf("%s/config.yaml", cfgPath))
 }
