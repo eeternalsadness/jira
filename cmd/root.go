@@ -22,7 +22,10 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"encoding/json"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 
 	"github.com/eeternalsadness/jira/util"
@@ -42,6 +45,13 @@ var rootCmd = &cobra.Command{
 	Short:   "A CLI tool to do common Jira tasks",
 	Long:    `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
 	Version: "v0.1.3",
+	PersistentPreRun: func(cmd *cobra.Command, args []string) {
+		latestVersion, err := getLatestVersion()
+		// ignore errors
+		if err == nil && latestVersion != cmd.Version {
+			fmt.Printf("\033[33mVersion '%s' is available. To update to the latest version, run:\ngo install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
+		}
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -90,4 +100,41 @@ func initConfig() {
 		fmt.Fprintln(os.Stderr, "Config file not found: ", viper.ConfigFileUsed())
 		os.Exit(1)
 	}
+}
+
+func getLatestVersion() (string, error) {
+	githubEndpoint := "https://api.github.com/repos/eeternalsadness/jira/releases/latest"
+
+	// call github releases api endpoint
+	resp, err := http.Get(githubEndpoint)
+	if err != nil {
+		return "", fmt.Errorf("failed to reach the Github endpoint to check version: %w", err)
+	}
+	defer resp.Body.Close()
+
+	// non-200 status code
+	if resp.StatusCode != 200 {
+		return "", fmt.Errorf("%s", resp.Status)
+	}
+
+	// read response body
+	respBody, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return "", fmt.Errorf("failed to read response body from Github: %w", err)
+	}
+
+	// parse as json
+	var data map[string]interface{}
+	err = json.Unmarshal(respBody, &data)
+	if err != nil {
+		return "", fmt.Errorf("failed to parse response body as JSON: %w", err)
+	}
+
+	// extract tag
+	tag, ok := data["tag_name"].(string)
+	if !ok {
+		return "", fmt.Errorf("expected 'tag_name' to be a string, got %T", data["tag_name"])
+	}
+
+	return tag, nil
 }
