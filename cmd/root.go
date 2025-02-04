@@ -44,16 +44,10 @@ var rootCmd = &cobra.Command{
 	Use:     "jira",
 	Short:   "A CLI tool to do common Jira tasks",
 	Long:    `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
-	Version: "v0.1.5",
-	//Run: func(cmd *cobra.Command, args []string) {
-	//	latestVersion, err := getLatestVersion()
-	//	fmt.Println(latestVersion)
-	//	fmt.Println(err)
-	//	// ignore errors
-	//	if err == nil && latestVersion != cmd.Version {
-	//		fmt.Printf("\033[33mVersion '%s' is available. To update to the latest version, run:\ngo install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
-	//	}
-	//},
+	Version: "v0.1.4",
+	PersistentPostRun: func(cmd *cobra.Command, args []string) {
+		checkVersion(cmd)
+	},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -104,6 +98,17 @@ func initConfig() {
 	}
 }
 
+func checkVersion(cmd *cobra.Command) {
+	latestVersion, err := getLatestVersion()
+
+	// ignore errors
+	if err == nil && latestVersion != cmd.Root().Version {
+		// TODO: potentially add an update command instead of telling the user to update manually
+		fmt.Printf("\n\033[33mVersion '%s' is available. To update to the latest version, run:\n\tgo install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
+	}
+}
+
+// TODO: put this in a different package
 func getLatestVersion() (string, error) {
 	githubEndpoint := "https://api.github.com/repos/eeternalsadness/jira/releases/latest"
 
