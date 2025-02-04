@@ -1,0 +1,26 @@
+name: Publish Module
+run-name: Publish ${{ github.ref }}
+on:
+  push:
+    tags:
+      - v*.*.*
+env:
+  GO_VERSION: "1.23.x"
+
+jobs:
+  build-publish:
+    runs-on: ubuntu-latest
+    name: "Build and publish"
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: "Set up Go"
+        uses: actions/setup-go@v5
+        with:
+          go-version: $GO_VERSION
+      - name: "Install dependencies"
+        run: go get
+      - name: Build
+        run: go build -v
+      - name: "Publish module"
+        run: GOPROXY=proxy.golang.org go list -m github.com/eeternalsadness/jira@${{ github.ref }}
