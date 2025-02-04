@@ -45,15 +45,14 @@ var rootCmd = &cobra.Command{
 	Short:   "A CLI tool to do common Jira tasks",
 	Long:    `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
 	Version: "v0.1.4",
-	PersistentPostRun: func(cmd *cobra.Command, args []string) {
-		checkVersion(cmd)
-	},
+	//PersistentPostRun: func(cmd *cobra.Command, args []string) {
+	//	checkVersion(cmd)
+	//},
 }
 
-// Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
 func Execute() {
 	err := rootCmd.Execute()
+	checkVersion(rootCmd)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -104,7 +103,7 @@ func checkVersion(cmd *cobra.Command) {
 	// ignore errors
 	if err == nil && latestVersion != cmd.Root().Version {
 		// TODO: potentially add an update command instead of telling the user to update manually
-		fmt.Printf("\n\033[33mVersion '%s' is available. To update to the latest version, run:\n\tgo install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
+		fmt.Printf("\n\033[33mVersion '%s' is available. To update to the latest version, run:\n  go install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
 	}
 }
 
