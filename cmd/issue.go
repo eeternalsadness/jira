@@ -48,9 +48,9 @@ Issues with status 'Done', 'Rejected', or 'Cancelled' are not returned.`,
 
 		// print out issues
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tIssue\tStatus\t")
+		fmt.Fprintln(w, "ID\tIssue\tStatus\tStatus Category\t")
 		for _, issue := range issues {
-			fmt.Fprintf(w, "%s\t[%s] %s\t%s\t\n", issue.Id, issue.Key, issue.Title, issue.Status)
+			fmt.Fprintf(w, "%s\t[%s] %s\t%s\t%s\t\n", issue.Id, issue.Key, issue.Title, issue.Status, issue.StatusCategory)
 		}
 		w.Flush()
 	},

@@ -8,11 +8,12 @@ import (
 )
 
 type Issue struct {
-	Id     string
-	Key    string
-	Title  string
-	Status string
-	Url    string
+	Id             string
+	Key            string
+	Title          string
+	Status         string
+	StatusCategory string
+	Url            string
 }
 
 func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
@@ -45,14 +46,16 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 		id := issueMap["id"].(string)
 		key := issueMap["key"].(string)
 		title := fieldsMap["summary"].(string)
-		status := statusCategoryMap["name"].(string)
+		status := statusMap["name"].(string)
+		statusCategory := statusCategoryMap["name"].(string)
 		url := issueMap["self"].(string)
 		outIssues[i] = Issue{
-			Id:     id,
-			Key:    key,
-			Title:  title,
-			Status: status,
-			Url:    url,
+			Id:             id,
+			Key:            key,
+			Title:          title,
+			Status:         status,
+			StatusCategory: statusCategory,
+			Url:            url,
 		}
 	}
 
