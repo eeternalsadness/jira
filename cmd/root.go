@@ -27,16 +27,20 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/eeternalsadness/jira/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
+const checkVersionInterval = 10 * time.Minute
+
 var (
-	cfgFile string
-	cfgPath string
-	jira    util.Jira
+	cfgFile              string
+	cfgPath              string
+	jira                 util.Jira
+	lastCheckVersionTime time.Time
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -45,9 +49,6 @@ var rootCmd = &cobra.Command{
 	Short:   "A CLI tool to do common Jira tasks",
 	Long:    `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
 	Version: "v0.1.4",
-	//PersistentPostRun: func(cmd *cobra.Command, args []string) {
-	//	checkVersion(cmd)
-	//},
 }
 
 func Execute() {
@@ -98,6 +99,14 @@ func initConfig() {
 }
 
 func checkVersion(cmd *cobra.Command) {
+	// only check every once in a while
+	fmt.Println(time.Since(lastCheckVersionTime))
+	if time.Since(lastCheckVersionTime) < checkVersionInterval {
+		fmt.Println("wait till next time")
+		return
+	}
+
+	lastCheckVersionTime = time.Now()
 	latestVersion, err := getLatestVersion()
 
 	// ignore errors
