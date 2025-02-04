@@ -45,15 +45,15 @@ var rootCmd = &cobra.Command{
 	Short:   "A CLI tool to do common Jira tasks",
 	Long:    `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
 	Version: "v0.1.3",
-	PersistentPreRun: func(cmd *cobra.Command, args []string) {
-		latestVersion, err := getLatestVersion()
-		fmt.Println(latestVersion)
-		fmt.Println(err)
-		// ignore errors
-		if err == nil && latestVersion != cmd.Version {
-			fmt.Printf("\033[33mVersion '%s' is available. To update to the latest version, run:\ngo install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
-		}
-	},
+	//Run: func(cmd *cobra.Command, args []string) {
+	//	latestVersion, err := getLatestVersion()
+	//	fmt.Println(latestVersion)
+	//	fmt.Println(err)
+	//	// ignore errors
+	//	if err == nil && latestVersion != cmd.Version {
+	//		fmt.Printf("\033[33mVersion '%s' is available. To update to the latest version, run:\ngo install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
+	//	}
+	//},
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
