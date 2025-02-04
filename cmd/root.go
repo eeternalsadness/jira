@@ -38,9 +38,10 @@ var (
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:   "jira",
-	Short: "A CLI tool to do common Jira tasks",
-	Long:  `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
+	Use:     "jira",
+	Short:   "A CLI tool to do common Jira tasks",
+	Long:    `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
+	Version: "v0.1.3",
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
