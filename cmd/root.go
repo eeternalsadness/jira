@@ -47,6 +47,8 @@ var rootCmd = &cobra.Command{
 	Version: "v0.1.3",
 	PersistentPreRun: func(cmd *cobra.Command, args []string) {
 		latestVersion, err := getLatestVersion()
+		fmt.Println(latestVersion)
+		fmt.Println(err)
 		// ignore errors
 		if err == nil && latestVersion != cmd.Version {
 			fmt.Printf("\033[33mVersion '%s' is available. To update to the latest version, run:\ngo install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
