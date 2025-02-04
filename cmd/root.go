@@ -77,12 +77,17 @@ func initConfig() {
 	// TODO: is it possible to check which command was called?
 	if err := viper.ReadInConfig(); err == nil {
 		if cfgFile != "" {
-			fmt.Fprintln(os.Stderr, "Using config file:", viper.ConfigFileUsed())
+			fmt.Fprintln(os.Stdout, "Using config file: ", viper.ConfigFileUsed())
 		}
 		// get jira config
-		viper.Unmarshal(&jira)
+		err = viper.Unmarshal(&jira)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "Failed to read the config file '%s': %w", cfgFile, err)
+			os.Exit(1)
+		}
 
 	} else if _, errStat := os.Stat(cfgFile); cfgFile != "" && os.IsNotExist(errStat) {
 		fmt.Fprintln(os.Stderr, "Config file not found: ", viper.ConfigFileUsed())
+		os.Exit(1)
 	}
 }
