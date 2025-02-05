@@ -4,7 +4,7 @@ A CLI program that performs common Jira tasks. Made with the Cobra & Viper frame
 
 ## Requirements
 
-To use the program, make sure Go is installed.
+To use the program, make sure Go is installed and added to `PATH`.
 
 Make sure to create a Jira API token for the program to use.
 
