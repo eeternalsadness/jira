@@ -29,7 +29,6 @@ import (
 var getCmd = &cobra.Command{
 	Use:   "get",
 	Short: "Get a Jira resource",
-	Long:  `Get a Jira resource.`,
 }
 
 func init() {

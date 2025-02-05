@@ -34,6 +34,7 @@ import (
 var configureCmd = &cobra.Command{
 	Use:   "configure",
 	Short: "Configure Jira domain, credentials, and some default values",
+	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		configure()
 	},

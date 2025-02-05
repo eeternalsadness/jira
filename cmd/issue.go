@@ -37,6 +37,7 @@ var getIssueCmd = &cobra.Command{
 	Short: "Get your current Jira issues",
 	Long: `Get Jira issues that are assigned to the current user (you).
 Issues with status 'Done', 'Rejected', or 'Cancelled' are not returned.`,
+	Args: cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		issues, err := jira.GetAssignedIssues()
 		if err != nil {
@@ -59,6 +60,7 @@ var createIssueCmd = &cobra.Command{
 	Use:   "issue",
 	Short: "Create a Jira issue",
 	Long:  `Create a Jira issue in the 'KV FnB Web' project (default). The issue is assigned to the current user by default.`,
+	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		reader := bufio.NewReader(os.Stdin)
 
