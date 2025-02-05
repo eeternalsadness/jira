@@ -101,6 +101,7 @@ func initConfig() {
 	}
 }
 
+// TODO: maybe refactor this to another package
 func checkVersion(cmd *cobra.Command) {
 	// only check every once in a while
 	lastCheckVersionTime, err := getLastCheckVersionTime()
