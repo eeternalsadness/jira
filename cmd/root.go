@@ -79,6 +79,7 @@ func initConfig() {
 		viper.SetConfigName("config")
 		viper.SetConfigType("yaml")
 	}
+	viper.SetDefault("CacheDir", "/tmp/jira-cobra")
 
 	// TODO: is it possible to check which command was called?
 	if err := viper.ReadInConfig(); err == nil {
