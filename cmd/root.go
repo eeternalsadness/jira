@@ -27,6 +27,7 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/eeternalsadness/jira/util"
@@ -34,13 +35,15 @@ import (
 	"github.com/spf13/viper"
 )
 
-const checkVersionInterval = 10 * time.Minute
+const (
+	checkVersionInterval = 10 * time.Minute
+	tmpDir               = "/tmp/jira-cobra"
+)
 
 var (
-	cfgFile              string
-	cfgPath              string
-	jira                 util.Jira
-	lastCheckVersionTime time.Time
+	cfgFile string
+	cfgPath string
+	jira    util.Jira
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -79,7 +82,6 @@ func initConfig() {
 		viper.SetConfigName("config")
 		viper.SetConfigType("yaml")
 	}
-	viper.SetDefault("CacheDir", "/tmp/jira-cobra")
 
 	// TODO: is it possible to check which command was called?
 	if err := viper.ReadInConfig(); err == nil {
@@ -89,7 +91,7 @@ func initConfig() {
 		// get jira config
 		err = viper.Unmarshal(&jira)
 		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to read the config file '%s': %w", cfgFile, err)
+			fmt.Fprintf(os.Stderr, "Failed to read the config file '%s': %s", cfgFile, err)
 			os.Exit(1)
 		}
 
@@ -101,20 +103,53 @@ func initConfig() {
 
 func checkVersion(cmd *cobra.Command) {
 	// only check every once in a while
-	fmt.Println(time.Since(lastCheckVersionTime))
-	if time.Since(lastCheckVersionTime) < checkVersionInterval {
-		fmt.Println("wait till next time")
+	lastCheckVersionTime, err := getLastCheckVersionTime()
+	if err != nil {
 		return
 	}
 
-	lastCheckVersionTime = time.Now()
+	if time.Since(lastCheckVersionTime) < checkVersionInterval {
+		return
+	}
+
 	latestVersion, err := getLatestVersion()
+	cobra.CheckErr(updateLastCheckVersionTime())
 
 	// ignore errors
 	if err == nil && latestVersion != cmd.Root().Version {
 		// TODO: potentially add an update command instead of telling the user to update manually
 		fmt.Printf("\n\033[33mVersion '%s' is available. To update to the latest version, run:\n  go install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
 	}
+}
+
+func getLastCheckVersionTime() (time.Time, error) {
+	tmpFilePath := fmt.Sprintf("%s/lastCheckVersionTime", tmpDir)
+	data, err := os.ReadFile(tmpFilePath)
+	if err != nil {
+		if !os.IsNotExist(err) {
+			return time.Time{}, fmt.Errorf("failed to read check version time file at '%s': %w", tmpFilePath, err)
+		} else {
+			return time.Unix(0, 0), nil
+		}
+	}
+
+	checkVersionTime, err := strconv.ParseInt(string(data), 10, 64)
+	if err != nil {
+		return time.Time{}, fmt.Errorf("failed to parse time from file: %w", err)
+	}
+
+	return time.Unix(checkVersionTime, 0), nil
+}
+
+func updateLastCheckVersionTime() error {
+	// make sure tmp dir is set up
+	err := os.MkdirAll(tmpDir, 0755)
+	cobra.CheckErr(err)
+
+	// write to file
+	tmpFilePath := fmt.Sprintf("%s/lastCheckVersionTime", tmpDir)
+	err = os.WriteFile(tmpFilePath, []byte(strconv.FormatInt(time.Now().Unix(), 10)), 0755)
+	return err
 }
 
 // TODO: put this in a different package
