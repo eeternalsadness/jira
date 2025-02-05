@@ -9,6 +9,7 @@ env:
   GO_VERSION: "1.23.x"
 
 jobs:
+  # TODO: to create a workflow for release branch to make sure it builds (and passes the tests once they're implemented)
   build-publish:
     runs-on: ubuntu-latest
     name: "Build and publish"
