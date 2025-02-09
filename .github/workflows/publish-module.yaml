@@ -1,5 +1,5 @@
 name: Publish Module
-run-name: Publish ${{ github.ref }}
+run-name: Publish Module
 on:
   push:
     tags:
