@@ -4,15 +4,17 @@ on:
   push:
     tags:
       - v*.*.*
+  pull_request:
+    branches:
+      - main
 
 env:
   GO_VERSION: "1.23.x"
 
 jobs:
-  # TODO: to create a workflow for release branch to make sure it builds (and passes the tests once they're implemented)
-  build-publish:
+  build:
     runs-on: ubuntu-latest
-    name: "Build and publish"
+    name: "Build"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,6 +26,18 @@ jobs:
         run: go get
       - name: Build
         run: go build -v
+
+  publish:
+    runs-on: ubuntu-latest
+    name: "Publish"
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: "Set up Go"
+        uses: actions/setup-go@v5
+        with:
+          go-version: ${{ env.GO_VERSION }}
       - name: "Publish module"
         run: GOPROXY=proxy.golang.org go list -m github.com/eeternalsadness/jira@${GITHUB_REF#refs/tags/}
       - name: "Create release"
