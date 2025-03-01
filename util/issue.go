@@ -11,6 +11,7 @@ type Issue struct {
 	Id             string
 	Key            string
 	Title          string
+	Description    string
 	Status         string
 	StatusCategory string
 	Url            string
@@ -46,6 +47,7 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 		id := issueMap["id"].(string)
 		key := issueMap["key"].(string)
 		title := fieldsMap["summary"].(string)
+		description := fieldsMap["description"].(string)
 		status := statusMap["name"].(string)
 		statusCategory := statusCategoryMap["name"].(string)
 		url := issueMap["self"].(string)
@@ -53,6 +55,7 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 			Id:             id,
 			Key:            key,
 			Title:          title,
+			Description:    description,
 			Status:         status,
 			StatusCategory: statusCategory,
 			Url:            url,
@@ -60,6 +63,48 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 	}
 
 	return outIssues, nil
+}
+
+func (jira *Jira) GetIssueById(issueId string) (Issue, error) {
+	path := fmt.Sprintf("rest/api/3/issue/%s", issueId)
+	resp, err := jira.callApi(path, "GET", nil)
+	if err != nil {
+		return Issue{}, fmt.Errorf("failed to call Jira API: %w", err)
+	}
+
+	// parse json data
+	var data map[string]interface{}
+	err = json.Unmarshal(resp, &data)
+	if err != nil {
+		return Issue{}, fmt.Errorf("failed to unmarshal JSON response from Jira API: %w", err)
+	}
+
+	// transform json into output
+	fieldsMap := data["fields"].(map[string]interface{})
+	statusMap := fieldsMap["status"].(map[string]interface{})
+	statusCategoryMap := statusMap["statusCategory"].(map[string]interface{})
+
+	// get the necessary fields for the struct
+	id := data["id"].(string)
+	key := data["key"].(string)
+	title := fieldsMap["summary"].(string)
+	description := fieldsMap["description"].(string)
+	status := statusMap["name"].(string)
+	statusCategory := statusCategoryMap["name"].(string)
+	url := data["self"].(string)
+
+	// form return struct
+	outIssue := Issue{
+		Id:             id,
+		Key:            key,
+		Title:          title,
+		Description:    description,
+		Status:         status,
+		StatusCategory: statusCategory,
+		Url:            url,
+	}
+
+	return outIssue, nil
 }
 
 func (jira *Jira) CreateIssue(projectId string, issueTypeId string, title string, description string) (string, error) {

@@ -37,21 +37,46 @@ var getIssueCmd = &cobra.Command{
 	Short: "Get your current Jira issues",
 	Long: `Get Jira issues that are assigned to the current user (you).
 Issues with status 'Done', 'Rejected', or 'Cancelled' are not returned.`,
-	Args: cobra.ExactArgs(0),
+	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
-		issues, err := jira.GetAssignedIssues()
+		getAllIssues, err := cmd.Flags().GetBool("all")
 		if err != nil {
-			fmt.Printf("Failed to get assigned issues: %s\n", err)
+			fmt.Printf("Failed to read --all flag: %s\n", err)
 			return
 		}
 
-		// print out issues
-		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-		fmt.Fprintln(w, "ID\tIssue\tStatus\tStatus Category\t")
-		for _, issue := range issues {
-			fmt.Fprintf(w, "%s\t[%s] %s\t%s\t%s\t\n", issue.Id, issue.Key, issue.Title, issue.Status, issue.StatusCategory)
+		if getAllIssues && len(args) > 0 {
+			fmt.Println("Cannot use --all with an issue ID!")
+			return
+		} else if !getAllIssues && len(args) == 0 {
+			cmd.Help()
+			return
+		} else if getAllIssues {
+			issues, err := jira.GetAssignedIssues()
+			if err != nil {
+				fmt.Printf("Failed to get assigned issues: %s\n", err)
+				return
+			}
+
+			// print out issues
+			w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+			fmt.Fprintln(w, "ID\tIssue\tStatus\tStatus Category\t")
+			for _, issue := range issues {
+				fmt.Fprintf(w, "%s\t[%s] %s\t%s\t%s\t\n", issue.Id, issue.Key, issue.Title, issue.Status, issue.StatusCategory)
+			}
+			w.Flush()
+		} else {
+			issueId := args[0]
+			issue, err := jira.GetIssueById(issueId)
+			if err != nil {
+				fmt.Printf("Failed to get assigned issue: %s\n", err)
+				return
+			}
+
+			// print out issue
+			fmt.Printf("[%s] %s\n\n", issue.Key, issue.Title)
+			fmt.Printf("Description:\n%s\n", issue.Description)
 		}
-		w.Flush()
 	},
 }
 
@@ -102,5 +127,6 @@ var createIssueCmd = &cobra.Command{
 
 func init() {
 	getCmd.AddCommand(getIssueCmd)
+	getIssueCmd.Flags().BoolP("all", "a", true, "--all")
 	createCmd.AddCommand(createIssueCmd)
 }
