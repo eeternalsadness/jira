@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/url"
+	"strings"
 )
 
 type Issue struct {
@@ -47,7 +48,7 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 		id := issueMap["id"].(string)
 		key := issueMap["key"].(string)
 		title := fieldsMap["summary"].(string)
-		description := fieldsMap["description"].(string)
+		description := getIssueDescriptionText(fieldsMap["description"].(map[string]interface{}))
 		status := statusMap["name"].(string)
 		statusCategory := statusCategoryMap["name"].(string)
 		url := issueMap["self"].(string)
@@ -66,7 +67,8 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 }
 
 func (jira *Jira) GetIssueById(issueId string) (Issue, error) {
-	path := fmt.Sprintf("rest/api/3/issue/%s", issueId)
+	fields := url.QueryEscape("summary,description,comment,status")
+	path := fmt.Sprintf("rest/api/3/issue/%s?fields=%s", issueId, fields)
 	resp, err := jira.callApi(path, "GET", nil)
 	if err != nil {
 		return Issue{}, fmt.Errorf("failed to call Jira API: %w", err)
@@ -78,6 +80,8 @@ func (jira *Jira) GetIssueById(issueId string) (Issue, error) {
 	if err != nil {
 		return Issue{}, fmt.Errorf("failed to unmarshal JSON response from Jira API: %w", err)
 	}
+	jsonOutput, _ := json.MarshalIndent(&data, "", "  ")
+	fmt.Println(string(jsonOutput))
 
 	// transform json into output
 	fieldsMap := data["fields"].(map[string]interface{})
@@ -88,7 +92,7 @@ func (jira *Jira) GetIssueById(issueId string) (Issue, error) {
 	id := data["id"].(string)
 	key := data["key"].(string)
 	title := fieldsMap["summary"].(string)
-	description := fieldsMap["description"].(string)
+	description := getIssueDescriptionText(fieldsMap["description"].(map[string]interface{}))
 	status := statusMap["name"].(string)
 	statusCategory := statusCategoryMap["name"].(string)
 	url := data["self"].(string)
@@ -105,6 +109,26 @@ func (jira *Jira) GetIssueById(issueId string) (Issue, error) {
 	}
 
 	return outIssue, nil
+}
+
+func getIssueDescriptionText(descriptionMap map[string]interface{}) string {
+	var builder strings.Builder
+
+	descriptionContent := descriptionMap["content"].([]interface{})
+	for _, content := range descriptionContent {
+		contentMap := content.(map[string]interface{})
+		if contentMap["type"].(string) == "paragraph" {
+			for _, contentContent := range contentMap["content"].([]interface{}) {
+				contentContentMap := contentContent.(map[string]interface{})
+				if contentContentMap["type"].(string) == "text" {
+					builder.WriteString(contentContentMap["text"].(string))
+					builder.WriteString("\n\n")
+				}
+			}
+		}
+	}
+
+	return builder.String()
 }
 
 func (jira *Jira) CreateIssue(projectId string, issueTypeId string, title string, description string) (string, error) {
