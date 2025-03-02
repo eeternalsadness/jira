@@ -33,7 +33,7 @@ import (
 
 // getIssueCmd represents the issue command when called by the get command
 var getIssueCmd = &cobra.Command{
-	Use:   "issue",
+	Use:   "issue (issueId | --all)",
 	Short: "Get your current Jira issues",
 	Long: `Get Jira issues that are assigned to the current user (you).
 Issues with status 'Done', 'Rejected', or 'Cancelled' are not returned.`,
@@ -49,6 +49,7 @@ Issues with status 'Done', 'Rejected', or 'Cancelled' are not returned.`,
 			fmt.Println("Cannot use --all with an issue ID!")
 			return
 		} else if !getAllIssues && len(args) == 0 {
+			fmt.Println("Missing argument or flags!")
 			cmd.Help()
 			return
 		} else if getAllIssues {
@@ -127,6 +128,6 @@ var createIssueCmd = &cobra.Command{
 
 func init() {
 	getCmd.AddCommand(getIssueCmd)
-	getIssueCmd.Flags().BoolP("all", "a", true, "--all")
+	getIssueCmd.Flags().BoolP("all", "a", false, "get all issues assigned to you")
 	createCmd.AddCommand(createIssueCmd)
 }
