@@ -79,8 +79,6 @@ func (jira *Jira) GetIssueById(issueId string) (Issue, error) {
 	if err != nil {
 		return Issue{}, fmt.Errorf("failed to unmarshal JSON response from Jira API: %w", err)
 	}
-	jsonOutput, _ := json.MarshalIndent(&data, "", "  ")
-	fmt.Println(string(jsonOutput))
 
 	// transform json into output
 	fieldsMap := data["fields"].(map[string]interface{})
