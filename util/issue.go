@@ -48,7 +48,6 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 		id := issueMap["id"].(string)
 		key := issueMap["key"].(string)
 		title := fieldsMap["summary"].(string)
-		description := getIssueDescriptionText(fieldsMap["description"].(map[string]interface{}))
 		status := statusMap["name"].(string)
 		statusCategory := statusCategoryMap["name"].(string)
 		url := issueMap["self"].(string)
@@ -56,7 +55,7 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 			Id:             id,
 			Key:            key,
 			Title:          title,
-			Description:    description,
+			Description:    "",
 			Status:         status,
 			StatusCategory: statusCategory,
 			Url:            url,
@@ -112,23 +111,22 @@ func (jira *Jira) GetIssueById(issueId string) (Issue, error) {
 }
 
 func getIssueDescriptionText(descriptionMap map[string]interface{}) string {
-	var builder strings.Builder
-
 	descriptionContent := descriptionMap["content"].([]interface{})
+	descriptionSlice := make([]string, len(descriptionContent))
 	for _, content := range descriptionContent {
 		contentMap := content.(map[string]interface{})
 		if contentMap["type"].(string) == "paragraph" {
 			for _, contentContent := range contentMap["content"].([]interface{}) {
 				contentContentMap := contentContent.(map[string]interface{})
 				if contentContentMap["type"].(string) == "text" {
-					builder.WriteString(contentContentMap["text"].(string))
-					builder.WriteString("\n\n")
+					// NOTE: assume that there's only 1 text field per content object
+					descriptionSlice = append(descriptionSlice, contentContentMap["text"].(string))
 				}
 			}
 		}
 	}
 
-	return builder.String()
+	return strings.Join(descriptionSlice, "\n")
 }
 
 func (jira *Jira) CreateIssue(projectId string, issueTypeId string, title string, description string) (string, error) {
