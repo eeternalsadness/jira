@@ -25,6 +25,8 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
+	"strings"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -33,58 +35,61 @@ import (
 // configureCmd represents the configure command
 var configureCmd = &cobra.Command{
 	Use:   "configure",
-	Short: "Configure Jira domain, credentials, and some default values",
+	Short: "Configure Jira domain and credentials",
 	Args:  cobra.ExactArgs(0),
 	Run: func(cmd *cobra.Command, args []string) {
 		configure()
 	},
 }
 
+// configureProjectsCmd represents the configure projects command
+var configureProjectsCmd = &cobra.Command{
+	Use:   "projects",
+	Short: "Configure the list of available Jira projects",
+	Args:  cobra.ExactArgs(0),
+	Run: func(cmd *cobra.Command, args []string) {
+		configureProjects()
+	},
+}
+
 func configure() {
 	reader := bufio.NewReader(os.Stdin)
 
-	// check for overwrite
-	if err := viper.ReadInConfig(); err == nil {
-		fmt.Printf("Config file exists at '%s'\n", viper.ConfigFileUsed())
-		fmt.Print("Overwrite config file? [y/n]: ")
-		overwrite, _ := reader.ReadString('\n')
-		overwrite = overwrite[:len(overwrite)-1]
-
-		if overwrite != "y" {
-			if overwrite != "n" {
-				fmt.Println("Input must be 'y' or 'n'.")
-			}
-			return
-		}
-	}
-
 	// create config folder
-	os.MkdirAll(cfgPath, 0755)
+	os.MkdirAll(cfgPath, 0o755)
 
 	// configure jira domain
-	fmt.Print("Enter the Jira domain [example.atlassian.net]: ")
-	domain, _ := reader.ReadString('\n')
-	domain = domain[:len(domain)-1]
-	viper.Set("Domain", domain)
+	err := viperUpsertString("Domain", "Enter the Jira domain", "example.atlassian.net")
+	if err != nil {
+		fmt.Printf("Failed to configure Jira domain: %s\n", err)
+		return
+	}
 
 	// configure jira email
-	fmt.Print("Enter the email address used for Jira [example@example.com]: ")
-	email, _ := reader.ReadString('\n')
-	email = email[:len(email)-1]
-	viper.Set("Email", email)
+	viperUpsertString("Email", "Enter the email address used for Jira", "example@example.com")
+	if err != nil {
+		fmt.Printf("Failed to configure Jira email: %s\n", err)
+		return
+	}
 
 	// configure jira api token
-	fmt.Print("Enter the Jira API token: ")
-	token, _ := reader.ReadString('\n')
-	token = token[:len(token)-1]
-	viper.Set("Token", token)
+	viperUpsertString("Token", "Enter the Jira API token", "")
+	if err != nil {
+		fmt.Printf("Failed to configure Jira API token: %s\n", err)
+		return
+	}
 
-	// configure default project id
-	// fmt.Print("Enter the default project ID [12345]: ")
-	// defaultProjectId, _ := reader.ReadString('\n')
-	// defaultProjectId = defaultProjectId[:len(defaultProjectId)-1]
-	// viper.Set("DefaultProjectId", defaultProjectId)
-	// FIXME: set default for now, to think of a better way to use project id
+	viper.WriteConfigAs(fmt.Sprintf("%s/config.yaml", cfgPath))
+}
+
+func configureProjects() {
+	reader := bufio.NewReader(os.Stdin)
+
+	projectIds := viper.GetIntSlice("ProjectIds")
+	fmt.Println("Current project IDs:")
+	fmt.Println(projectIds)
+
+	viper.Set("DefaultProjectId", defaultProjectId)
 	viper.SetDefault("DefaultProjectId", "10140")
 
 	// configure jira email
@@ -98,6 +103,74 @@ func configure() {
 	viper.WriteConfigAs(fmt.Sprintf("%s/config.yaml", cfgPath))
 }
 
+func addProjects(currentProjectIds []int) ([]int, error) {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Enter the list of project IDs to add (separate by commas): ")
+	userInput, _ := reader.ReadString('\n')
+	userInput = userInput[:len(userInput)-1]
+	userInputSlice := strings.Split(userInput, ",")
+	// parse project ids
+	projectIdsToAdd := make([]int, 10)
+	for i := 0; i < len(userInputSlice); i++ {
+		projectIdString := strings.TrimSpace(userInputSlice[i])
+		projectIdInt, err := strconv.Atoi(projectIdString)
+		if err != nil {
+			return nil, fmt.Errorf("Invalid project ID: %s", projectIdString)
+		}
+		projectIdsToAdd = append(projectIdsToAdd, projectIdInt)
+	}
+
+	return append(currentProjectIds, projectIdsToAdd...), nil
+}
+
+func userYesNo(prompt string) (bool, error) {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Printf("%s [y/n]: ", prompt)
+	userInput, _ := reader.ReadString('\n')
+	userInput = userInput[:len(userInput)-1]
+
+	switch userInput {
+	case "y":
+		return true, nil
+	case "n":
+		return false, nil
+	default:
+		return false, fmt.Errorf("Input must be 'y' or 'n'.")
+	}
+}
+
+func viperUpsertString(key string, prompt string, example string) error {
+	reader := bufio.NewReader(os.Stdin)
+
+	if len(example) > 0 {
+		fmt.Printf("%s [%s]: ", prompt, example)
+	} else {
+		fmt.Printf("%s: ", prompt)
+	}
+
+	userInput, _ := reader.ReadString('\n')
+	userInput = userInput[:len(userInput)-1]
+
+	// check for existing config
+	if viper.GetString(key) != "" {
+		overwrite, err := userYesNo(fmt.Sprintf("Configuration for key '%s' already exists. Overwrite?", key))
+		if err != nil {
+			return err
+		}
+
+		if overwrite {
+			viper.Set(key, userInput)
+		}
+	} else {
+		viper.Set(key, userInput)
+	}
+
+	return nil
+}
+
 func init() {
 	rootCmd.AddCommand(configureCmd)
+	configureCmd.AddCommand(configureProjectsCmd)
 }
