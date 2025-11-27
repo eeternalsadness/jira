@@ -20,7 +20,7 @@ type Issue struct {
 
 func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 	// call api
-	jql := url.QueryEscape("assignee = currentuser() AND status NOT IN (Done, Rejected, Cancelled)")
+	jql := url.QueryEscape("assignee = currentuser() AND statuscategory != \"Done\"")
 	fields := url.QueryEscape("summary,status")
 	path := fmt.Sprintf("rest/api/3/search/jql?jql=%s&fields=%s", jql, fields)
 	resp, err := jira.callApi(path, "GET", nil)
