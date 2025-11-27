@@ -53,8 +53,6 @@ var configureProjectsCmd = &cobra.Command{
 }
 
 func configure() {
-	reader := bufio.NewReader(os.Stdin)
-
 	// create config folder
 	os.MkdirAll(cfgPath, 0o755)
 
@@ -66,14 +64,14 @@ func configure() {
 	}
 
 	// configure jira email
-	viperUpsertString("Email", "Enter the email address used for Jira", "example@example.com")
+	err = viperUpsertString("Email", "Enter the email address used for Jira", "example@example.com")
 	if err != nil {
 		fmt.Printf("Failed to configure Jira email: %s\n", err)
 		return
 	}
 
 	// configure jira api token
-	viperUpsertString("Token", "Enter the Jira API token", "")
+	err = viperUpsertString("Token", "Enter the Jira API token", "")
 	if err != nil {
 		fmt.Printf("Failed to configure Jira API token: %s\n", err)
 		return
@@ -85,43 +83,43 @@ func configure() {
 func configureProjects() {
 	reader := bufio.NewReader(os.Stdin)
 
+	// get current project ids
 	projectIds := viper.GetIntSlice("ProjectIds")
 	fmt.Println("Current project IDs:")
 	fmt.Println(projectIds)
 
-	viper.Set("DefaultProjectId", defaultProjectId)
-	viper.SetDefault("DefaultProjectId", "10140")
-
-	// configure jira email
-	// fmt.Print("Enter the default issue type ID for the project [12345]: ")
-	// defaultIssueTypeId, _ := reader.ReadString('\n')
-	// defaultIssueTypeId = defaultIssueTypeId[:len(defaultIssueTypeId)-1]
-	// viper.Set("DefaultIssueTypeId", defaultIssueTypeId)
-	// FIXME: set default for now, to think of a better way to use issue type id
-	viper.SetDefault("DefaultIssueTypeId", "10101")
-
-	viper.WriteConfigAs(fmt.Sprintf("%s/config.yaml", cfgPath))
-}
-
-func addProjects(currentProjectIds []int) ([]int, error) {
-	reader := bufio.NewReader(os.Stdin)
-
-	fmt.Print("Enter the list of project IDs to add (separate by commas): ")
+	fmt.Print("Enter the new list of project IDs (separate by commas): ")
 	userInput, _ := reader.ReadString('\n')
 	userInput = userInput[:len(userInput)-1]
 	userInputSlice := strings.Split(userInput, ",")
+
 	// parse project ids
-	projectIdsToAdd := make([]int, 10)
-	for i := 0; i < len(userInputSlice); i++ {
+	var projectIdsNew []int
+	for i := range userInputSlice {
 		projectIdString := strings.TrimSpace(userInputSlice[i])
 		projectIdInt, err := strconv.Atoi(projectIdString)
 		if err != nil {
-			return nil, fmt.Errorf("Invalid project ID: %s", projectIdString)
+			fmt.Printf("Invalid project ID: %s", projectIdString)
+			return
 		}
-		projectIdsToAdd = append(projectIdsToAdd, projectIdInt)
+		projectIdsNew = append(projectIdsNew, projectIdInt)
 	}
 
-	return append(currentProjectIds, projectIdsToAdd...), nil
+	if len(projectIds) > 0 {
+		overwrite, err := userYesNo("Overwrite existing project IDs?")
+		if err != nil {
+			fmt.Printf("%s\n", err)
+			return
+		}
+
+		if overwrite {
+			viper.Set("ProjectIds", projectIdsNew)
+		}
+	} else {
+		viper.Set("ProjectIds", projectIdsNew)
+	}
+
+	viper.WriteConfigAs(fmt.Sprintf("%s/config.yaml", cfgPath))
 }
 
 func userYesNo(prompt string) (bool, error) {
