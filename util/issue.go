@@ -127,7 +127,7 @@ func getIssueDescriptionText(descriptionMap map[string]interface{}) string {
 	return strings.Join(descriptionSlice, "\n")
 }
 
-func (jira *Jira) CreateIssue(projectId string, issueTypeId string, title string, description string) (string, error) {
+func (jira *Jira) CreateIssue(projectId int, issueTypeId int, title string, description string) (string, error) {
 	// get current user id
 	currentUserId, err := jira.getCurrentUserId()
 	if err != nil {
@@ -161,10 +161,10 @@ func (jira *Jira) CreateIssue(projectId string, issueTypeId string, title string
         "id": "%s"
       },
       "project": {
-        "id": "%s"
+        "id": "%d"
       },
       "issuetype": {
-        "id": "%s"
+        "id": "%d"
       },
       %s
       "summary": "%s"
@@ -180,7 +180,7 @@ func (jira *Jira) CreateIssue(projectId string, issueTypeId string, title string
 	}
 
 	// parse json data
-	var data map[string]interface{}
+	var data map[string]any
 	err = json.Unmarshal(resp, &data)
 	if err != nil {
 		return "", fmt.Errorf("failed to unmarshal JSON response from Jira API: %w", err)
