@@ -35,6 +35,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TODO: determine what goes into the config file and what doesn't
 const (
 	checkVersionInterval = 10 * time.Minute
 	tmpDir               = "/tmp/jira-cobra"
@@ -94,7 +95,6 @@ func initConfig() {
 			fmt.Fprintf(os.Stderr, "Failed to read the config file '%s': %s", cfgFile, err)
 			os.Exit(1)
 		}
-
 	} else if _, errStat := os.Stat(cfgFile); cfgFile != "" && os.IsNotExist(errStat) {
 		fmt.Fprintln(os.Stderr, "Config file not found: ", viper.ConfigFileUsed())
 		os.Exit(1)
@@ -148,6 +148,7 @@ func updateLastCheckVersionTime() error {
 	cobra.CheckErr(err)
 
 	// write to file
+	// TODO: maybe put this in the config file
 	tmpFilePath := fmt.Sprintf("%s/lastCheckVersionTime", tmpDir)
 	err = os.WriteFile(tmpFilePath, []byte(strconv.FormatInt(time.Now().Unix(), 10)), 0o755)
 	return err
@@ -155,6 +156,7 @@ func updateLastCheckVersionTime() error {
 
 // TODO: put this in a different package
 func getLatestVersion() (string, error) {
+	// FIXME: move hard coded value elsewhere
 	githubEndpoint := "https://api.github.com/repos/eeternalsadness/jira/releases/latest"
 
 	// call github releases api endpoint
