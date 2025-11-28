@@ -52,6 +52,17 @@ var configureProjectsCmd = &cobra.Command{
 	},
 }
 
+// configureIssueTypesCmd represents the configure projects command
+var configureIssueTypesCmd = &cobra.Command{
+	Use:     "issueTypes",
+	Aliases: []string{"types"},
+	Short:   "Configure the list of available issue types",
+	Args:    cobra.ExactArgs(0),
+	Run: func(cmd *cobra.Command, args []string) {
+		configureIssueTypes()
+	},
+}
+
 func configure() {
 	// create config folder
 	os.MkdirAll(cfgPath, 0o755)
@@ -122,6 +133,48 @@ func configureProjects() {
 	viper.WriteConfigAs(fmt.Sprintf("%s/config.yaml", cfgPath))
 }
 
+func configureIssueTypes() {
+	reader := bufio.NewReader(os.Stdin)
+
+	// get current project ids
+	issueTypeIds := viper.GetIntSlice("IssueTypeIds")
+	fmt.Println("Current issue type IDs:")
+	fmt.Println(issueTypeIds)
+
+	fmt.Print("Enter the new list of issue type IDs (separate by commas): ")
+	userInput, _ := reader.ReadString('\n')
+	userInput = userInput[:len(userInput)-1]
+	userInputSlice := strings.Split(userInput, ",")
+
+	// parse issue type ids
+	var issueTypeIdsNew []int
+	for i := range userInputSlice {
+		issueTypeIdString := strings.TrimSpace(userInputSlice[i])
+		issueTypeIdInt, err := strconv.Atoi(issueTypeIdString)
+		if err != nil {
+			fmt.Printf("Invalid project ID: %s", issueTypeIdString)
+			return
+		}
+		issueTypeIdsNew = append(issueTypeIdsNew, issueTypeIdInt)
+	}
+
+	if len(issueTypeIds) > 0 {
+		overwrite, err := userYesNo("Overwrite existing issue type IDs?")
+		if err != nil {
+			fmt.Printf("%s\n", err)
+			return
+		}
+
+		if overwrite {
+			viper.Set("IssueTypeIds", issueTypeIdsNew)
+		}
+	} else {
+		viper.Set("IssueTypeIds", issueTypeIdsNew)
+	}
+
+	viper.WriteConfigAs(fmt.Sprintf("%s/config.yaml", cfgPath))
+}
+
 func userYesNo(prompt string) (bool, error) {
 	reader := bufio.NewReader(os.Stdin)
 
@@ -171,4 +224,5 @@ func viperUpsertString(key string, prompt string, example string) error {
 func init() {
 	rootCmd.AddCommand(configureCmd)
 	configureCmd.AddCommand(configureProjectsCmd)
+	configureCmd.AddCommand(configureIssueTypesCmd)
 }

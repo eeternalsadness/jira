@@ -83,14 +83,19 @@ Issues with status category 'Done' are not returned.`,
 
 // createIssueCmd represents the issue command when called by the create command
 var createIssueCmd = &cobra.Command{
-	Use:   "issue -p PROJECT_ID",
+	Use:   "issue -p PROJECT_ID -t ISSUE_TYPE_ID",
 	Short: "Create a Jira issue",
 	Long:  `Create a Jira issue in the specified project. The issue is assigned to the current user by default.`,
-	Args:  cobra.MaximumNArgs(1),
+	Args:  cobra.MaximumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
 		cobra.CheckErr(cmd.ValidateRequiredFlags())
 
 		projectId, err := cmd.Flags().GetInt("project-id")
+		if err != nil {
+			return err
+		}
+
+		issueTypeId, err := cmd.Flags().GetInt("issue-type-id")
 		if err != nil {
 			return err
 		}
@@ -119,9 +124,7 @@ var createIssueCmd = &cobra.Command{
 		description = description[:len(description)-1]
 
 		// create issue
-		// TODO: find a way to create issues for different projects
-		// TODO: find a way to create different issue types
-		issueKey, err := jira.CreateIssue(projectId, 10002, title, description)
+		issueKey, err := jira.CreateIssue(projectId, issueTypeId, title, description)
 		if err != nil {
 			return fmt.Errorf("failed to create Jira issue: %s", err)
 		}
@@ -137,4 +140,6 @@ func init() {
 	createCmd.AddCommand(createIssueCmd)
 	createIssueCmd.Flags().IntP("project-id", "p", -1, "create an issue in the specified project")
 	createIssueCmd.MarkFlagRequired("project-id")
+	createIssueCmd.Flags().IntP("issue-type-id", "t", -1, "specify the issue type to create")
+	createIssueCmd.MarkFlagRequired("issue-type-id")
 }
