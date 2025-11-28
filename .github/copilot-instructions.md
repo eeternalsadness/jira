@@ -32,11 +32,12 @@ A Go CLI tool for interacting with Jira APIs. Enables developers to manage Jira 
 
 ### General Guideline
 
-- Make sure each command has the following attributes: `Use`, `Short`, `Long`, `Aliases`, `Example`
+- Make sure each command has the following attributes: `Use`, `Short`, `Long`, `Aliases` (if necessary), `Example`
 - Use `RunE` for commands that can return errors
   - Use `cmd.SilenceUsage = true` to suppress printing usage on runtime errors
 - Use `PersistentPreRunE` and `PreRunE` to handle configuration logic before command logic is executed
 - Use `Persistent*` functions and attributes if child commands should inherit such functions or attributes
+- Keep the `*RunE` and `*PersistentPreRunE` functions short and readable. If they're more than 10 lines long, create a new function and call that function inside `*RunE` or `*PersistentPreRunE`
 
 ### Naming Conventions
 
