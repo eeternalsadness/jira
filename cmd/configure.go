@@ -181,7 +181,7 @@ func configureIssueTypes() {
 	}
 
 	// set default issue type ID
-	issueTypeIds = viper.GetIntSlice("ProjectIds")
+	issueTypeIds = viper.GetIntSlice("IssueTypeIds")
 	if len(issueTypeIds) > 0 {
 		// default to first issue type ID
 		defaultIssueTypeId := issueTypeIds[0]
