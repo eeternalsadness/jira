@@ -36,7 +36,7 @@ var getIssueCmd = &cobra.Command{
 	Use:   "issue (issueId | --all)",
 	Short: "Get your current Jira issues",
 	Long: `Get Jira issues that are assigned to the current user (you).
-Issues with status 'Done', 'Rejected', or 'Cancelled' are not returned.`,
+Issues with status category 'Done' are not returned.`,
 	Args: cobra.MaximumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		getAllIssues, err := cmd.Flags().GetBool("all")
@@ -83,46 +83,51 @@ Issues with status 'Done', 'Rejected', or 'Cancelled' are not returned.`,
 
 // createIssueCmd represents the issue command when called by the create command
 var createIssueCmd = &cobra.Command{
-	Use:   "issue",
+	Use:   "issue -p PROJECT_ID",
 	Short: "Create a Jira issue",
-	Long:  `Create a Jira issue in the 'KV FnB Web' project (default). The issue is assigned to the current user by default.`,
-	Args:  cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
+	Long:  `Create a Jira issue in the specified project. The issue is assigned to the current user by default.`,
+	Args:  cobra.MaximumNArgs(1),
+	RunE: func(cmd *cobra.Command, args []string) error {
+		cobra.CheckErr(cmd.ValidateRequiredFlags())
+
+		projectId, err := cmd.Flags().GetInt("project-id")
+		if err != nil {
+			return err
+		}
+
 		reader := bufio.NewReader(os.Stdin)
 
 		// prompt for issue's title
 		fmt.Print("Enter the issue's title: ")
 		title, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Printf("Failed to read user input: %s\n", err)
+			return fmt.Errorf("failed to read user input: %s", err)
 		}
 		title = title[:len(title)-1]
 
 		// title can't be empty
 		if len(strings.TrimSpace(title)) == 0 {
-			fmt.Println("Issue's title can't be empty!")
-			return
+			return fmt.Errorf("issue's title can't be empty")
 		}
 
 		// prompt for issue's description
 		fmt.Print("Enter the issue's description (optional): ")
 		description, err := reader.ReadString('\n')
 		if err != nil {
-			fmt.Printf("Failed to read user input: %s\n", err)
-			return
+			return fmt.Errorf("failed to read user input: %s", err)
 		}
 		description = description[:len(description)-1]
 
 		// create issue
 		// TODO: find a way to create issues for different projects
 		// TODO: find a way to create different issue types
-		issueKey, err := jira.CreateIssue(jira.DefaultProjectId, jira.DefaultIssueTypeId, title, description)
+		issueKey, err := jira.CreateIssue(projectId, 10002, title, description)
 		if err != nil {
-			fmt.Printf("Failed to create Jira issue: %s\n", err)
-			return
+			return fmt.Errorf("failed to create Jira issue: %s", err)
 		}
 
 		fmt.Printf("Issue '%s' created.\nURL: https://%s/browse/%s.\n", title, jira.Domain, issueKey)
+		return nil
 	},
 }
 
@@ -130,4 +135,6 @@ func init() {
 	getCmd.AddCommand(getIssueCmd)
 	getIssueCmd.Flags().BoolP("all", "a", false, "get all issues assigned to you")
 	createCmd.AddCommand(createIssueCmd)
+	createIssueCmd.Flags().IntP("project-id", "p", -1, "create an issue in the specified project")
+	createIssueCmd.MarkFlagRequired("project-id")
 }
