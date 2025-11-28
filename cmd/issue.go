@@ -29,6 +29,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 // getIssueCmd represents the issue command when called by the get command
@@ -88,16 +89,27 @@ var createIssueCmd = &cobra.Command{
 	Long:  `Create a Jira issue in the specified project. The issue is assigned to the current user by default.`,
 	Args:  cobra.MaximumNArgs(2),
 	RunE: func(cmd *cobra.Command, args []string) error {
+		var err error
 		cobra.CheckErr(cmd.ValidateRequiredFlags())
 
-		projectId, err := cmd.Flags().GetInt("project-id")
-		if err != nil {
-			return err
+		var projectId int
+		if cmd.Flags().Changed("project-id") {
+			projectId, err = cmd.Flags().GetInt("project-id")
+			if err != nil {
+				return err
+			}
+		} else {
+			projectId = viper.GetInt("DefaultProjectId")
 		}
 
-		issueTypeId, err := cmd.Flags().GetInt("issue-type-id")
-		if err != nil {
-			return err
+		var issueTypeId int
+		if cmd.Flags().Changed("issue-type-id") {
+			issueTypeId, err = cmd.Flags().GetInt("issue-type-id")
+			if err != nil {
+				return err
+			}
+		} else {
+			issueTypeId = viper.GetInt("DefaultIssueTypeId")
 		}
 
 		reader := bufio.NewReader(os.Stdin)
@@ -139,7 +151,5 @@ func init() {
 	getIssueCmd.Flags().BoolP("all", "a", false, "get all issues assigned to you")
 	createCmd.AddCommand(createIssueCmd)
 	createIssueCmd.Flags().IntP("project-id", "p", -1, "create an issue in the specified project")
-	createIssueCmd.MarkFlagRequired("project-id")
 	createIssueCmd.Flags().IntP("issue-type-id", "t", -1, "specify the issue type to create")
-	createIssueCmd.MarkFlagRequired("issue-type-id")
 }
