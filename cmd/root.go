@@ -22,23 +22,14 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"os"
-	"strconv"
-	"time"
 
+	"github.com/eeternalsadness/jira/internal/cli/issue"
 	"github.com/eeternalsadness/jira/util"
+
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-)
-
-// TODO: determine what goes into the config file and what doesn't
-const (
-	checkVersionInterval = 10 * time.Minute
-	tmpDir               = "/tmp/jira-cobra"
 )
 
 var (
@@ -57,7 +48,6 @@ var rootCmd = &cobra.Command{
 
 func Execute() {
 	err := rootCmd.Execute()
-	checkVersion(rootCmd)
 	if err != nil {
 		os.Exit(1)
 	}
@@ -67,6 +57,8 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/jira/config.yaml)")
+
+	rootCmd.AddCommand(issue.NewCommand())
 }
 
 func initConfig() {
@@ -99,96 +91,4 @@ func initConfig() {
 		fmt.Fprintln(os.Stderr, "Config file not found: ", viper.ConfigFileUsed())
 		os.Exit(1)
 	}
-}
-
-// TODO: maybe refactor this to another package
-func checkVersion(cmd *cobra.Command) {
-	// only check every once in a while
-	lastCheckVersionTime, err := getLastCheckVersionTime()
-	if err != nil {
-		return
-	}
-
-	if time.Since(lastCheckVersionTime) < checkVersionInterval {
-		return
-	}
-
-	latestVersion, err := getLatestVersion()
-	cobra.CheckErr(updateLastCheckVersionTime())
-
-	// ignore errors
-	if err == nil && latestVersion != cmd.Root().Version {
-		// TODO: potentially add an update command instead of telling the user to update manually
-		fmt.Printf("\n\033[33mVersion '%s' is available. To update to the latest version, run:\n  go install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
-	}
-}
-
-func getLastCheckVersionTime() (time.Time, error) {
-	tmpFilePath := fmt.Sprintf("%s/lastCheckVersionTime", tmpDir)
-	data, err := os.ReadFile(tmpFilePath)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return time.Time{}, fmt.Errorf("failed to read check version time file at '%s': %w", tmpFilePath, err)
-		} else {
-			return time.Unix(0, 0), nil
-		}
-	}
-
-	checkVersionTime, err := strconv.ParseInt(string(data), 10, 64)
-	if err != nil {
-		return time.Time{}, fmt.Errorf("failed to parse time from file: %w", err)
-	}
-
-	return time.Unix(checkVersionTime, 0), nil
-}
-
-func updateLastCheckVersionTime() error {
-	// make sure tmp dir is set up
-	err := os.MkdirAll(tmpDir, 0o755)
-	cobra.CheckErr(err)
-
-	// write to file
-	// TODO: maybe put this in the config file
-	tmpFilePath := fmt.Sprintf("%s/lastCheckVersionTime", tmpDir)
-	err = os.WriteFile(tmpFilePath, []byte(strconv.FormatInt(time.Now().Unix(), 10)), 0o755)
-	return err
-}
-
-// TODO: put this in a different package
-func getLatestVersion() (string, error) {
-	// FIXME: move hard coded value elsewhere
-	githubEndpoint := "https://api.github.com/repos/eeternalsadness/jira/releases/latest"
-
-	// call github releases api endpoint
-	resp, err := http.Get(githubEndpoint)
-	if err != nil {
-		return "", fmt.Errorf("failed to reach the Github endpoint to check version: %w", err)
-	}
-	defer resp.Body.Close()
-
-	// non-200 status code
-	if resp.StatusCode != 200 {
-		return "", fmt.Errorf("%s", resp.Status)
-	}
-
-	// read response body
-	respBody, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response body from Github: %w", err)
-	}
-
-	// parse as json
-	var data map[string]interface{}
-	err = json.Unmarshal(respBody, &data)
-	if err != nil {
-		return "", fmt.Errorf("failed to parse response body as JSON: %w", err)
-	}
-
-	// extract tag
-	tag, ok := data["tag_name"].(string)
-	if !ok {
-		return "", fmt.Errorf("expected 'tag_name' to be a string, got %T", data["tag_name"])
-	}
-
-	return tag, nil
 }
