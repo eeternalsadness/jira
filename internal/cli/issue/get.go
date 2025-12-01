@@ -33,7 +33,7 @@ var isAll bool
 
 func newGetCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:   "issue (issueId | --all)",
+		Use:   "get",
 		Short: "Get your current Jira issues",
 		Long: `Get Jira issues that are assigned to the current user (you).
 	Issues with status category 'Done' are not returned.`,
@@ -54,10 +54,11 @@ jira issue get PROJ-123`,
 	return cmd
 }
 
-func getIssue(_ *cobra.Command, args []string) error {
+func getIssue(cmd *cobra.Command, args []string) error {
 	if isAll && len(args) > 0 {
 		return fmt.Errorf("cannot use --all with an issue ID")
 	} else if !isAll && len(args) == 0 {
+		cmd.Usage()
 		return fmt.Errorf("missing argument or flags")
 	} else if isAll {
 		issues, err := jira.GetAssignedIssues()
