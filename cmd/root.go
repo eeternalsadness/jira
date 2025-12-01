@@ -27,7 +27,7 @@ import (
 	"os"
 
 	"github.com/eeternalsadness/jira/internal/cli/issue"
-	"github.com/eeternalsadness/jira/util"
+	"github.com/eeternalsadness/jira/internal/util"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -36,7 +36,6 @@ import (
 var (
 	cfgFile string
 	cfgPath string
-	jira    util.Jira
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -48,6 +47,9 @@ var rootCmd = &cobra.Command{
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return initConfig(cmd)
 	},
+	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
+		return util.CheckVersion(cmd)
+	},
 }
 
 func Execute() {
@@ -58,7 +60,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/jira/config.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.config/jira/config.yaml)")
 
 	rootCmd.AddCommand(issue.NewCommand())
 }
@@ -89,14 +91,8 @@ func initConfig(cmd *cobra.Command) error {
 	if cfgFile != "" {
 		fmt.Fprintln(os.Stdout, "Using config file: ", viper.ConfigFileUsed())
 	}
-	// get jira config
-	err := viper.Unmarshal(&jira)
-	if err != nil {
-		return fmt.Errorf("failed to read the config file '%s': %s", cfgFile, err)
-	}
 
-	err = viper.BindPFlags(cmd.Flags())
-	if err != nil {
+	if err := viper.BindPFlags(cmd.Flags()); err != nil {
 		return err
 	}
 
