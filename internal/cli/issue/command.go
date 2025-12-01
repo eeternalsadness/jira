@@ -22,8 +22,11 @@ THE SOFTWARE.
 package issue
 
 import (
+	"github.com/eeternalsadness/jira/util"
 	"github.com/spf13/cobra"
 )
+
+var jira util.Jira
 
 // NewCommand creates and returns the issue command
 func NewCommand() *cobra.Command {
@@ -46,9 +49,8 @@ jira issue transition PROJ-123`,
 
 	// Add subcommands
 	issueCmd.AddCommand(newGetCommand())
-	issueCmd.AddCommand(newCreateCommand())
-	issueCmd.AddCommand(newTransitionCommand())
+	// issueCmd.AddCommand(newCreateCommand())
+	// issueCmd.AddCommand(newTransitionCommand())
 
 	return issueCmd
 }
-
