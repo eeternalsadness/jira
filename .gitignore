@@ -8,6 +8,7 @@
 *.so
 *.dylib
 jira
+!jira/
 
 # Test binary, built with `go test -c`
 *.test
