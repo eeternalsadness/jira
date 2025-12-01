@@ -101,5 +101,5 @@ func selectTransition(transitions []util.Transition) (util.Transition, error) {
 }
 
 func init() {
-	rootCmd.AddCommand(transitionCmd)
+	// rootCmd.AddCommand(transitionCmd)
 }

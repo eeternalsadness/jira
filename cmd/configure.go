@@ -273,7 +273,7 @@ func viperUpsertInt(key string, prompt string, example string) error {
 }
 
 func init() {
-	rootCmd.AddCommand(configureCmd)
+	// rootCmd.AddCommand(configureCmd)
 	configureCmd.AddCommand(configureProjectsCmd)
 	configureCmd.AddCommand(configureIssueTypesCmd)
 }
