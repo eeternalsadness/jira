@@ -44,11 +44,11 @@ jira issue get --all
 # Get a specific issue by ID
 jira issue get PROJ-123`,
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
 			return getIssue(cmd, args)
 		},
 	}
 
-	cmd.SilenceUsage = true
 	cmd.Flags().BoolVarP(&isAll, "all", "a", false, "get all issues assigned to you")
 
 	return cmd

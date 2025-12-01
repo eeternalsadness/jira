@@ -61,11 +61,11 @@ jira issue create --project-id 123 --issue-type-id 456`,
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			cmd.SilenceUsage = true
 			return createIssue()
 		},
 	}
 
-	cmd.SilenceUsage = true
 	cmd.Flags().IntVarP(&projectID, "project-id", "p", -1, "create an issue in the specified project")
 	cmd.Flags().IntVarP(&issueTypeID, "issue-type-id", "t", -1, "specify the issue type to create")
 

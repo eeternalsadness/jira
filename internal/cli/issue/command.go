@@ -61,7 +61,7 @@ jira issue transition PROJ-123`,
 	// Add subcommands
 	issueCmd.AddCommand(newGetCommand())
 	issueCmd.AddCommand(newCreateCommand())
-	// issueCmd.AddCommand(newTransitionCommand())
+	issueCmd.AddCommand(newTransitionCommand())
 
 	return issueCmd
 }
