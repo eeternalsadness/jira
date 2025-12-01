@@ -26,17 +26,16 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/eeternalsadness/jira/internal/cli/configure"
 	"github.com/eeternalsadness/jira/internal/cli/issue"
+
 	"github.com/eeternalsadness/jira/internal/util"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-var (
-	cfgFile string
-	cfgPath string
-)
+var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -63,6 +62,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.config/jira/config.yaml)")
 
 	rootCmd.AddCommand(issue.NewCommand())
+	rootCmd.AddCommand(configure.NewCommand())
 }
 
 func initConfig(cmd *cobra.Command) error {
@@ -74,8 +74,7 @@ func initConfig(cmd *cobra.Command) error {
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
-		cfgPath = fmt.Sprintf("%s/.config/jira/", home)
-		viper.AddConfigPath(cfgPath)
+		viper.AddConfigPath(fmt.Sprintf("%s/.config/jira/", home))
 		viper.SetConfigName("config")
 		viper.SetConfigType("yaml")
 	}
