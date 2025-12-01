@@ -37,28 +37,36 @@ import (
 const (
 	checkVersionInterval = 10 * time.Minute
 	tmpDir               = "/tmp/jira-cobra"
+	githubEndpoint       = "https://api.github.com/repos/eeternalsadness/jira/releases/latest"
 )
 
-// TODO: maybe refactor this to another package
-func checkVersion(cmd *cobra.Command) {
+func CheckVersion(cmd *cobra.Command) error {
 	// only check every once in a while
 	lastCheckVersionTime, err := getLastCheckVersionTime()
 	if err != nil {
-		return
+		return err
 	}
 
+	// still within version check cooldown, do nothing
 	if time.Since(lastCheckVersionTime) < checkVersionInterval {
-		return
+		return nil
 	}
 
 	latestVersion, err := getLatestVersion()
-	cobra.CheckErr(updateLastCheckVersionTime())
+	if err != nil {
+		return err
+	}
 
-	// ignore errors
-	if err == nil && latestVersion != cmd.Root().Version {
+	if err := updateLastCheckVersionTime(); err != nil {
+		return err
+	}
+
+	if latestVersion != cmd.Root().Version {
 		// TODO: potentially add an update command instead of telling the user to update manually
 		fmt.Printf("\n\033[33mVersion '%s' is available. To update to the latest version, run:\n  go install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
 	}
+
+	return nil
 }
 
 func getLastCheckVersionTime() (time.Time, error) {
@@ -92,11 +100,7 @@ func updateLastCheckVersionTime() error {
 	return err
 }
 
-// TODO: put this in a different package
 func getLatestVersion() (string, error) {
-	// FIXME: move hard coded value elsewhere
-	githubEndpoint := "https://api.github.com/repos/eeternalsadness/jira/releases/latest"
-
 	// call github releases api endpoint
 	resp, err := http.Get(githubEndpoint)
 	if err != nil {

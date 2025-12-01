@@ -61,7 +61,7 @@ func getIssue(cmd *cobra.Command, args []string) error {
 		cmd.Usage()
 		return fmt.Errorf("missing argument or flags")
 	} else if isAll {
-		issues, err := jira.GetAssignedIssues()
+		issues, err := jiraClient.GetAssignedIssues()
 		if err != nil {
 			return fmt.Errorf("failed to get assigned issues: %s", err)
 		}
@@ -75,7 +75,7 @@ func getIssue(cmd *cobra.Command, args []string) error {
 		w.Flush()
 	} else {
 		issueId := args[0]
-		issue, err := jira.GetIssueById(issueId)
+		issue, err := jiraClient.GetIssueById(issueId)
 		if err != nil {
 			return fmt.Errorf("failed to get assigned issue: %s", err)
 		}
