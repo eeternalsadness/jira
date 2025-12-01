@@ -50,7 +50,6 @@ jira issue create
 jira issue transition PROJ-123`,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			// get jira config
-
 			if err := viper.Unmarshal(&jiraClient); err != nil {
 				return fmt.Errorf("failed to read the config file '%s': %s", viper.ConfigFileUsed(), err)
 			}
@@ -61,7 +60,7 @@ jira issue transition PROJ-123`,
 
 	// Add subcommands
 	issueCmd.AddCommand(newGetCommand())
-	// issueCmd.AddCommand(newCreateCommand())
+	issueCmd.AddCommand(newCreateCommand())
 	// issueCmd.AddCommand(newTransitionCommand())
 
 	return issueCmd
