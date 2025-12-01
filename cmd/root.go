@@ -22,6 +22,7 @@ THE SOFTWARE.
 package cmd
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -44,6 +45,9 @@ var rootCmd = &cobra.Command{
 	Short:   "A CLI tool to do common Jira tasks",
 	Long:    `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
 	Version: "v0.1.7",
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		return initConfig(cmd)
+	},
 }
 
 func Execute() {
@@ -54,14 +58,12 @@ func Execute() {
 }
 
 func init() {
-	cobra.OnInitialize(initConfig)
-
 	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.config/jira/config.yaml)")
 
 	rootCmd.AddCommand(issue.NewCommand())
 }
 
-func initConfig() {
+func initConfig(cmd *cobra.Command) error {
 	if cfgFile != "" {
 		// Use config file from the flag.
 		viper.SetConfigFile(cfgFile)
@@ -76,19 +78,27 @@ func initConfig() {
 		viper.SetConfigType("yaml")
 	}
 
-	// TODO: is it possible to check which command was called?
-	if err := viper.ReadInConfig(); err == nil {
-		if cfgFile != "" {
-			fmt.Fprintln(os.Stdout, "Using config file: ", viper.ConfigFileUsed())
+	if err := viper.ReadInConfig(); err != nil {
+		var configFileNotFoundErr viper.ConfigFileNotFoundError
+		if errors.As(err, &configFileNotFoundErr) {
+			fmt.Println("Config file not found! Please run 'jira configure' to configure your Jira credentials.")
 		}
-		// get jira config
-		err = viper.Unmarshal(&jira)
-		if err != nil {
-			fmt.Fprintf(os.Stderr, "Failed to read the config file '%s': %s", cfgFile, err)
-			os.Exit(1)
-		}
-	} else if _, errStat := os.Stat(cfgFile); cfgFile != "" && os.IsNotExist(errStat) {
-		fmt.Fprintln(os.Stderr, "Config file not found: ", viper.ConfigFileUsed())
-		os.Exit(1)
+		return err
 	}
+
+	if cfgFile != "" {
+		fmt.Fprintln(os.Stdout, "Using config file: ", viper.ConfigFileUsed())
+	}
+	// get jira config
+	err := viper.Unmarshal(&jira)
+	if err != nil {
+		return fmt.Errorf("failed to read the config file '%s': %s", cfgFile, err)
+	}
+
+	err = viper.BindPFlags(cmd.Flags())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
