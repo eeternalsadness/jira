@@ -6,6 +6,7 @@ import (
 	"fmt"
 )
 
+// NOTE: follow Jira API reference
 type Transition struct {
 	ID       string
 	Name     string
