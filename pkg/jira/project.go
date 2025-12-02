@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+// NOTE: follow Jira API reference
 type Project struct {
 	ID   string
 	Key  string

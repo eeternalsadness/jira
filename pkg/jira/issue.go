@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// NOTE: follow Jira API reference
 type Issue struct {
 	Id             string
 	Key            string
