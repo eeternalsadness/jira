@@ -27,9 +27,9 @@ func configureIssueTypes() {
 	reader := bufio.NewReader(os.Stdin)
 
 	// get current project ids
-	issueTypeIds := viper.GetIntSlice("IssueTypeIds")
+	issueTypeIDs := viper.GetIntSlice("IssueTypeIDs")
 	fmt.Println("Current issue type IDs:")
-	fmt.Println(issueTypeIds)
+	fmt.Println(issueTypeIDs)
 
 	fmt.Print("Enter the new list of issue type IDs (separate by commas): ")
 	userInput, _ := reader.ReadString('\n')
@@ -37,18 +37,18 @@ func configureIssueTypes() {
 	userInputSlice := strings.Split(userInput, ",")
 
 	// parse issue type ids
-	var issueTypeIdsNew []int
+	var issueTypeIDsNew []int
 	for i := range userInputSlice {
-		issueTypeIdString := strings.TrimSpace(userInputSlice[i])
-		issueTypeIdInt, err := strconv.Atoi(issueTypeIdString)
+		issueTypeIDString := strings.TrimSpace(userInputSlice[i])
+		issueTypeIDInt, err := strconv.Atoi(issueTypeIDString)
 		if err != nil {
-			fmt.Printf("Invalid project ID: %s", issueTypeIdString)
+			fmt.Printf("Invalid project ID: %s", issueTypeIDString)
 			return
 		}
-		issueTypeIdsNew = append(issueTypeIdsNew, issueTypeIdInt)
+		issueTypeIDsNew = append(issueTypeIDsNew, issueTypeIDInt)
 	}
 
-	if len(issueTypeIds) > 0 {
+	if len(issueTypeIDs) > 0 {
 		overwrite, err := util.UserYesNo("Overwrite existing issue type IDs?")
 		if err != nil {
 			fmt.Printf("%s\n", err)
@@ -56,18 +56,18 @@ func configureIssueTypes() {
 		}
 
 		if overwrite {
-			viper.Set("IssueTypeIds", issueTypeIdsNew)
+			viper.Set("IssueTypeIDs", issueTypeIDsNew)
 		}
 	} else {
-		viper.Set("IssueTypeIds", issueTypeIdsNew)
+		viper.Set("IssueTypeIDs", issueTypeIDsNew)
 	}
 
 	// set default issue type ID
-	issueTypeIds = viper.GetIntSlice("IssueTypeIds")
-	if len(issueTypeIds) > 0 {
+	issueTypeIDs = viper.GetIntSlice("IssueTypeIDs")
+	if len(issueTypeIDs) > 0 {
 		// default to first issue type ID
-		defaultIssueTypeId := issueTypeIds[0]
-		util.ViperUpsertInt("DefaultIssueTypeId", "Enter the default issue type ID", strconv.Itoa(defaultIssueTypeId))
+		defaultIssueTypeID := issueTypeIDs[0]
+		util.ViperUpsertInt("DefaultIssueTypeID", "Enter the default issue type ID", strconv.Itoa(defaultIssueTypeID))
 	}
 
 	viper.WriteConfig()

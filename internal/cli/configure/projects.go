@@ -26,9 +26,9 @@ func configureProjects() {
 	reader := bufio.NewReader(os.Stdin)
 
 	// get current project ids
-	projectIds := viper.GetIntSlice("ProjectIds")
+	projectIDs := viper.GetIntSlice("ProjectIDs")
 	fmt.Println("Current project IDs:")
-	fmt.Println(projectIds)
+	fmt.Println(projectIDs)
 
 	fmt.Print("Enter the new list of project IDs (separate by commas): ")
 	userInput, _ := reader.ReadString('\n')
@@ -36,18 +36,18 @@ func configureProjects() {
 	userInputSlice := strings.Split(userInput, ",")
 
 	// parse project ids
-	var projectIdsNew []int
+	var projectIDsNew []int
 	for i := range userInputSlice {
-		projectIdString := strings.TrimSpace(userInputSlice[i])
-		projectIdInt, err := strconv.Atoi(projectIdString)
+		projectIDString := strings.TrimSpace(userInputSlice[i])
+		projectIDInt, err := strconv.Atoi(projectIDString)
 		if err != nil {
-			fmt.Printf("Invalid project ID: %s", projectIdString)
+			fmt.Printf("Invalid project ID: %s", projectIDString)
 			return
 		}
-		projectIdsNew = append(projectIdsNew, projectIdInt)
+		projectIDsNew = append(projectIDsNew, projectIDInt)
 	}
 
-	if len(projectIds) > 0 {
+	if len(projectIDs) > 0 {
 		overwrite, err := util.UserYesNo("Overwrite existing project IDs?")
 		if err != nil {
 			fmt.Printf("%s\n", err)
@@ -55,18 +55,18 @@ func configureProjects() {
 		}
 
 		if overwrite {
-			viper.Set("ProjectIds", projectIdsNew)
+			viper.Set("ProjectIDs", projectIDsNew)
 		}
 	} else {
-		viper.Set("ProjectIds", projectIdsNew)
+		viper.Set("ProjectIDs", projectIDsNew)
 	}
 
 	// set default project ID
-	projectIds = viper.GetIntSlice("ProjectIds")
-	if len(projectIds) > 0 {
+	projectIDs = viper.GetIntSlice("ProjectIDs")
+	if len(projectIDs) > 0 {
 		// default to first project ID
-		defaultProjectId := projectIds[0]
-		util.ViperUpsertInt("DefaultProjectId", "Enter the default project ID", strconv.Itoa(defaultProjectId))
+		defaultProjectID := projectIDs[0]
+		util.ViperUpsertInt("DefaultProjectID", "Enter the default project ID", strconv.Itoa(defaultProjectID))
 	}
 
 	viper.WriteConfig()
