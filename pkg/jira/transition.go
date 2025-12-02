@@ -7,14 +7,14 @@ import (
 )
 
 type Transition struct {
-	ID       int
+	ID       string
 	Name     string
 	Category string
 }
 
-func (jira *Jira) GetTransitions(issueID int) ([]Transition, error) {
+func (jira *Jira) GetTransitions(issueID string) ([]Transition, error) {
 	// call api
-	path := fmt.Sprintf("rest/api/3/issue/%d/transitions", issueID)
+	path := fmt.Sprintf("rest/api/3/issue/%s/transitions", issueID)
 	resp, err := jira.callApi(path, "GET", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call Jira API: %w", err)
@@ -36,7 +36,7 @@ func (jira *Jira) GetTransitions(issueID int) ([]Transition, error) {
 		statusCategory := toMap["statusCategory"].(map[string]any)
 
 		// get the necessary fields for the struct
-		id := transitionMap["id"].(int)
+		id := transitionMap["id"].(string)
 		name := transitionMap["name"].(string)
 		categoryName := statusCategory["name"].(string)
 		outTransitions[i] = Transition{
@@ -49,14 +49,14 @@ func (jira *Jira) GetTransitions(issueID int) ([]Transition, error) {
 	return outTransitions, nil
 }
 
-func (jira *Jira) TransitionIssue(issueID int, transitionID int) error {
+func (jira *Jira) TransitionIssue(issueID string, transitionID string) error {
 	// call api
 	body := fmt.Sprintf(`{
     "transition": {
-      "id": "%d"
+      "id": "%s"
     }
   }`, transitionID)
-	path := fmt.Sprintf("rest/api/3/issue/%d/transitions", issueID)
+	path := fmt.Sprintf("rest/api/3/issue/%s/transitions", issueID)
 	resp, err := jira.callApi(path, "POST", bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		return fmt.Errorf("failed to call Jira API: %w", err)

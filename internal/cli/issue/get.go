@@ -74,8 +74,8 @@ func getIssue(cmd *cobra.Command, args []string) error {
 		}
 		w.Flush()
 	} else {
-		issueId := args[0]
-		issue, err := jiraClient.GetIssueById(issueId)
+		issueID := args[0]
+		issue, err := jiraClient.GetIssueById(issueID)
 		if err != nil {
 			return fmt.Errorf("failed to get assigned issue: %s", err)
 		}
