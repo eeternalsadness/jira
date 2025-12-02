@@ -35,6 +35,9 @@ func NewCommand() *cobra.Command {
 		Short:   "",
 		Long:    ``,
 		Example: ``,
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return nil
+		},
 	}
 
 	// Add subcommands

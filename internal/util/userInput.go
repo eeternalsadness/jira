@@ -27,9 +27,13 @@ func UserYesNo(prompt string) (bool, error) {
 	}
 }
 
-func UserSelectFromRange(headerMap map[string]string, options []any) (int, error) {
-	// make sure options is a struct
-	if t := reflect.TypeOf(options).Kind(); t != reflect.Struct {
+func UserSelectFromRange[T any](headerMap map[string]string, options []T) (int, error) {
+	if len(options) == 0 {
+		return -1, fmt.Errorf("expected non-empty slice, got empty slice")
+	}
+
+	// make sure options is a struct slice
+	if t := reflect.TypeOf(options[0]).Kind(); t != reflect.Struct {
 		return -1, fmt.Errorf("expected a struct slice, got %s", t.String())
 	}
 

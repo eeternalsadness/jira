@@ -32,8 +32,8 @@ import (
 )
 
 var (
-	projectID   int
-	issueTypeID int
+	projectID   string
+	issueTypeID string
 )
 
 func newCreateCommand() *cobra.Command {
@@ -49,15 +49,15 @@ jira issue create
 jira issue create --project-id 123 --issue-type-id 456`,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if cmd.Flags().Changed("project-id") {
-				projectID = viper.GetInt("project-id")
+				projectID = viper.GetString("project-id")
 			} else {
-				projectID = viper.GetInt("DefaultProjectId")
+				projectID = viper.GetString("DefaultProjectId")
 			}
 
 			if cmd.Flags().Changed("issue-type-id") {
-				issueTypeID = viper.GetInt("issue-type-id")
+				issueTypeID = viper.GetString("issue-type-id")
 			} else {
-				issueTypeID = viper.GetInt("DefaultIssueTypeId")
+				issueTypeID = viper.GetString("DefaultIssueTypeId")
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -66,8 +66,8 @@ jira issue create --project-id 123 --issue-type-id 456`,
 		},
 	}
 
-	cmd.Flags().IntVarP(&projectID, "project-id", "p", -1, "create an issue in the specified project")
-	cmd.Flags().IntVarP(&issueTypeID, "issue-type-id", "t", -1, "specify the issue type to create")
+	cmd.Flags().StringVarP(&projectID, "project-id", "p", "", "create an issue in the specified project")
+	cmd.Flags().StringVarP(&issueTypeID, "issue-type-id", "t", "", "specify the issue type to create")
 
 	return cmd
 }

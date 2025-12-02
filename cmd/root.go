@@ -22,8 +22,6 @@ THE SOFTWARE.
 package cmd
 
 import (
-	"errors"
-	"fmt"
 	"os"
 
 	"github.com/eeternalsadness/jira/internal/cli/configure"
@@ -32,10 +30,7 @@ import (
 	"github.com/eeternalsadness/jira/internal/util"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
-
-var cfgFile string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -43,9 +38,6 @@ var rootCmd = &cobra.Command{
 	Short:   "A CLI tool to do common Jira tasks",
 	Long:    `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
 	Version: "v0.1.7",
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		return initConfig(cmd)
-	},
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
 		return util.CheckVersion(cmd)
 	},
@@ -59,41 +51,8 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.config/jira/config.yaml)")
+	rootCmd.PersistentFlags().StringP("config", "c", "", "config file (default is $HOME/.config/jira/config.yaml)")
 
 	rootCmd.AddCommand(issue.NewCommand())
 	rootCmd.AddCommand(configure.NewCommand())
-}
-
-func initConfig(cmd *cobra.Command) error {
-	if cfgFile != "" {
-		// Use config file from the flag.
-		viper.SetConfigFile(cfgFile)
-	} else {
-		// Find home directory.
-		home, err := os.UserHomeDir()
-		cobra.CheckErr(err)
-
-		viper.AddConfigPath(fmt.Sprintf("%s/.config/jira/", home))
-		viper.SetConfigName("config")
-		viper.SetConfigType("yaml")
-	}
-
-	if err := viper.ReadInConfig(); err != nil {
-		var configFileNotFoundErr viper.ConfigFileNotFoundError
-		if errors.As(err, &configFileNotFoundErr) {
-			fmt.Println("Config file not found! Please run 'jira configure' to configure your Jira credentials.")
-		}
-		return err
-	}
-
-	if cfgFile != "" {
-		fmt.Fprintln(os.Stdout, "Using config file: ", viper.ConfigFileUsed())
-	}
-
-	if err := viper.BindPFlags(cmd.Flags()); err != nil {
-		return err
-	}
-
-	return nil
 }

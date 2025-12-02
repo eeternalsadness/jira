@@ -22,11 +22,9 @@ THE SOFTWARE.
 package issue
 
 import (
-	"fmt"
-
+	"github.com/eeternalsadness/jira/internal/util"
 	"github.com/eeternalsadness/jira/pkg/jira"
 	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
 )
 
 var jiraClient jira.Jira
@@ -49,9 +47,10 @@ jira issue create
 # Transition an issue
 jira issue transition PROJ-123`,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			// get jira config
-			if err := viper.Unmarshal(&jiraClient); err != nil {
-				return fmt.Errorf("failed to read the config file '%s': %s", viper.ConfigFileUsed(), err)
+			var err error
+			jiraClient, err = util.InitConfig(cmd)
+			if err != nil {
+				return err
 			}
 
 			return nil

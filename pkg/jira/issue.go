@@ -74,22 +74,30 @@ func (jira *Jira) GetIssueById(issueId string) (Issue, error) {
 	}
 
 	// parse json data
-	var data map[string]interface{}
+	var data map[string]any
 	err = json.Unmarshal(resp, &data)
 	if err != nil {
 		return Issue{}, fmt.Errorf("failed to unmarshal JSON response from Jira API: %w", err)
 	}
 
+	// var out bytes.Buffer
+	// json.Indent(&out, resp, "", "  ")
+	// fmt.Println(out.String())
+
 	// transform json into output
-	fieldsMap := data["fields"].(map[string]interface{})
-	statusMap := fieldsMap["status"].(map[string]interface{})
-	statusCategoryMap := statusMap["statusCategory"].(map[string]interface{})
+	fieldsMap := data["fields"].(map[string]any)
+	statusMap := fieldsMap["status"].(map[string]any)
+	statusCategoryMap := statusMap["statusCategory"].(map[string]any)
 
 	// get the necessary fields for the struct
 	id := data["id"].(string)
 	key := data["key"].(string)
 	title := fieldsMap["summary"].(string)
-	description := getIssueDescriptionText(fieldsMap["description"].(map[string]interface{}))
+	descriptionMap, ok := fieldsMap["description"].(map[string]any)
+	description := ""
+	if ok {
+		description = getIssueDescriptionText(descriptionMap)
+	}
 	status := statusMap["name"].(string)
 	statusCategory := statusCategoryMap["name"].(string)
 	url := data["self"].(string)
@@ -108,14 +116,14 @@ func (jira *Jira) GetIssueById(issueId string) (Issue, error) {
 	return outIssue, nil
 }
 
-func getIssueDescriptionText(descriptionMap map[string]interface{}) string {
-	descriptionContent := descriptionMap["content"].([]interface{})
+func getIssueDescriptionText(descriptionMap map[string]any) string {
+	descriptionContent := descriptionMap["content"].([]any)
 	descriptionSlice := make([]string, len(descriptionContent))
 	for _, content := range descriptionContent {
-		contentMap := content.(map[string]interface{})
+		contentMap := content.(map[string]any)
 		if contentMap["type"].(string) == "paragraph" {
-			for _, contentContent := range contentMap["content"].([]interface{}) {
-				contentContentMap := contentContent.(map[string]interface{})
+			for _, contentContent := range contentMap["content"].([]any) {
+				contentContentMap := contentContent.(map[string]any)
 				if contentContentMap["type"].(string) == "text" {
 					// NOTE: assume that there's only 1 text field per content object
 					descriptionSlice = append(descriptionSlice, contentContentMap["text"].(string))
@@ -127,9 +135,9 @@ func getIssueDescriptionText(descriptionMap map[string]interface{}) string {
 	return strings.Join(descriptionSlice, "\n")
 }
 
-func (jira *Jira) CreateIssue(projectId int, issueTypeId int, title string, description string) (string, error) {
+func (jira *Jira) CreateIssue(projectID string, issueTypeID string, title string, description string) (string, error) {
 	// get current user id
-	currentUserId, err := jira.getCurrentUserId()
+	currentUserID, err := jira.getCurrentUserId()
 	if err != nil {
 		return "", fmt.Errorf("failed to get current user ID: %w", err)
 	}
@@ -161,16 +169,16 @@ func (jira *Jira) CreateIssue(projectId int, issueTypeId int, title string, desc
         "id": "%s"
       },
       "project": {
-        "id": "%d"
+        "id": "%s"
       },
       "issuetype": {
-        "id": "%d"
+        "id": "%s"
       },
       %s
       "summary": "%s"
     },
     "update": {}
-  }`, currentUserId, projectId, issueTypeId, descriptionField, title)
+  }`, currentUserID, projectID, issueTypeID, descriptionField, title)
 
 	// call api
 	path := "rest/api/3/issue"

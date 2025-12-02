@@ -22,12 +22,9 @@ THE SOFTWARE.
 package issue
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strconv"
-	"text/tabwriter"
 
+	"github.com/eeternalsadness/jira/internal/util"
 	"github.com/eeternalsadness/jira/pkg/jira"
 	"github.com/spf13/cobra"
 )
@@ -46,10 +43,7 @@ jira issue create --project-id 123 --issue-type-id 456`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 
-			issueID, err := strconv.Atoi(args[0])
-			if err != nil {
-				return err
-			}
+			issueID := args[0]
 			return transitionIssue(issueID)
 		},
 	}
@@ -57,7 +51,7 @@ jira issue create --project-id 123 --issue-type-id 456`,
 	return cmd
 }
 
-func transitionIssue(issueID int) error {
+func transitionIssue(issueID string) error {
 	transitions, err := jiraClient.GetTransitions(issueID)
 	if err != nil {
 		return fmt.Errorf("failed to get valid transitions for issue: %s", err)
@@ -75,46 +69,30 @@ func transitionIssue(issueID int) error {
 
 	err = jiraClient.TransitionIssue(issueID, transition.ID)
 	if err != nil {
-		return fmt.Errorf("failed when transitioning issue %d: %s", issueID, err)
+		return fmt.Errorf("failed when transitioning issue %s: %s", issueID, err)
 	}
 
-	fmt.Printf("Issue %d transitioned to '%s'.\n", issueID, transition.Name)
+	fmt.Printf("Issue %s transitioned to '%s'.\n", issueID, transition.Name)
 	return nil
 }
 
 func selectTransition(transitions []jira.Transition) (jira.Transition, error) {
-	// print out available transitions
+	// form header map
+	headerMap := map[string]string{
+		"Name":     "Name",
+		"Category": "Category",
+	}
+
+	// prompt user for transition
 	fmt.Println("Available transitions:")
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "#\tName\tCategory\t")
-	for i, transition := range transitions {
-		fmt.Fprintf(w, "%d\t%s\t%s\t\n", i+1, transition.Name, transition.Category)
-	}
-	w.Flush()
-
-	// prompt for transition
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Printf("\nEnter the # to transition to [1 - %d, or 'q' to quit]: ", len(transitions))
-	inputStr, err := reader.ReadString('\n')
+	transitionIndex, err := util.UserSelectFromRange(headerMap, transitions)
 	if err != nil {
 		return jira.Transition{}, err
 	}
-	inputStr = inputStr[:len(inputStr)-1]
 
-	// quit if user types 'q'
-	if inputStr == "q" {
+	// user quits
+	if transitionIndex == -1 {
 		return jira.Transition{}, nil
-	}
-
-	// check number value
-	transitionIndex, err := strconv.ParseInt(inputStr, 10, 64)
-	if err != nil {
-		return jira.Transition{}, err
-	}
-
-	// check if index value is valid
-	if transitionIndex <= 0 || transitionIndex > int64(len(transitions)) {
-		return jira.Transition{}, fmt.Errorf("transition # be a number between 1 and %d (inclusive)", len(transitions))
 	}
 
 	return transitions[transitionIndex-1], nil
