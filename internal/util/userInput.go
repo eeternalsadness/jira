@@ -4,10 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"reflect"
 	"strconv"
-	"strings"
-	"text/tabwriter"
 )
 
 func UserYesNo(prompt string) (bool, error) {
@@ -27,67 +24,14 @@ func UserYesNo(prompt string) (bool, error) {
 	}
 }
 
-func UserSelectFromRange[T any](headerMap map[string]string, options []T) (int, error) {
-	if len(options) == 0 {
-		return -1, fmt.Errorf("expected non-empty slice, got empty slice")
+func UserSelectFromRange(max int) (int, error) {
+	if max < 1 {
+		panic("max must be >= 1!")
 	}
-
-	// make sure options is a struct slice
-	if t := reflect.TypeOf(options[0]).Kind(); t != reflect.Struct {
-		return -1, fmt.Errorf("expected a struct slice, got %s", t.String())
-	}
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	var builder strings.Builder
-
-	// print out headers
-	builder.WriteString("#\t")
-	if len(headerMap) > 0 {
-		// use header map if it's passed in
-		for header := range headerMap {
-			_, err := builder.WriteString(fmt.Sprintf("%s\t", header))
-			if err != nil {
-				return -1, err
-			}
-		}
-	} else {
-		// print all struct fields if header map not passed in
-		t := reflect.TypeOf(options[0])
-		for i := range t.NumField() {
-			_, err := builder.WriteString(fmt.Sprintf("%s\t", t.Field(i).Name))
-			if err != nil {
-				return -1, err
-			}
-		}
-	}
-	fmt.Fprintln(w, builder.String())
-	builder.Reset()
-
-	// print out options
-	for i, option := range options {
-		v := reflect.ValueOf(option)
-
-		if len(headerMap) > 0 {
-			// use the header map to generate tab-separated string of values
-			builder.WriteString(fmt.Sprintf("%d\t", i+1))
-			for _, fieldName := range headerMap {
-				builder.WriteString(fmt.Sprintf("%s\t", v.FieldByName(fieldName).String()))
-			}
-		} else {
-			// print all values if header map not passed in
-			for i := range v.NumField() {
-				builder.WriteString(fmt.Sprintf("%s\t", v.Field(i).String()))
-			}
-		}
-		builder.WriteString("\n")
-		fmt.Fprintf(w, builder.String())
-		builder.Reset()
-	}
-	w.Flush()
 
 	// prompt for input
 	reader := bufio.NewReader(os.Stdin)
-	fmt.Printf("\nSelect an option [1 - %d, or 'q' to quit]: ", len(options))
+	fmt.Printf("\nSelect an option [1 - %d, or 'q' to quit]: ", max)
 	inputStr, err := reader.ReadString('\n')
 	if err != nil {
 		return -1, err
@@ -106,8 +50,8 @@ func UserSelectFromRange[T any](headerMap map[string]string, options []T) (int, 
 	}
 
 	// check if index value is valid
-	if index <= 0 || index > len(options) {
-		return -1, fmt.Errorf("you must choose a number between 1 and %d (inclusive)", len(options))
+	if index <= 0 || index > max {
+		return -1, fmt.Errorf("you must choose a number between 1 and %d (inclusive)", max)
 	}
 
 	return index - 1, nil
