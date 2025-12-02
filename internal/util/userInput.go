@@ -42,10 +42,22 @@ func UserSelectFromRange[T any](headerMap map[string]string, options []T) (int, 
 
 	// print out headers
 	builder.WriteString("#\t")
-	for header := range headerMap {
-		_, err := builder.WriteString(fmt.Sprintf("%s\t", header))
-		if err != nil {
-			return -1, err
+	if len(headerMap) > 0 {
+		// use header map if it's passed in
+		for header := range headerMap {
+			_, err := builder.WriteString(fmt.Sprintf("%s\t", header))
+			if err != nil {
+				return -1, err
+			}
+		}
+	} else {
+		// print all struct fields if header map not passed in
+		t := reflect.TypeOf(options[0])
+		for i := range t.NumField() {
+			_, err := builder.WriteString(fmt.Sprintf("%s\t", t.Field(i).Name))
+			if err != nil {
+				return -1, err
+			}
 		}
 	}
 	fmt.Fprintln(w, builder.String())
@@ -55,10 +67,17 @@ func UserSelectFromRange[T any](headerMap map[string]string, options []T) (int, 
 	for i, option := range options {
 		v := reflect.ValueOf(option)
 
-		// use the header map to generate tab-separated string of values
-		builder.WriteString(fmt.Sprintf("%d\t", i+1))
-		for _, fieldName := range headerMap {
-			builder.WriteString(fmt.Sprintf("%s\t", v.FieldByName(fieldName)))
+		if len(headerMap) > 0 {
+			// use the header map to generate tab-separated string of values
+			builder.WriteString(fmt.Sprintf("%d\t", i+1))
+			for _, fieldName := range headerMap {
+				builder.WriteString(fmt.Sprintf("%s\t", v.FieldByName(fieldName).String()))
+			}
+		} else {
+			// print all values if header map not passed in
+			for i := range v.NumField() {
+				builder.WriteString(fmt.Sprintf("%s\t", v.Field(i).String()))
+			}
 		}
 		builder.WriteString("\n")
 		fmt.Fprintf(w, builder.String())
