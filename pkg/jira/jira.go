@@ -12,8 +12,8 @@ type Jira struct {
 	Domain             string
 	Email              string
 	Token              string
-	DefaultProjectId   string
-	DefaultIssueTypeId string
+	DefaultProjectID   string
+	DefaultIssueTypeID string
 }
 
 func (jira *Jira) getAuthToken() string {
@@ -21,7 +21,7 @@ func (jira *Jira) getAuthToken() string {
 	return base64.StdEncoding.EncodeToString([]byte(auth))
 }
 
-func (jira *Jira) callApi(path string, method string, body io.Reader) ([]byte, error) {
+func (jira *Jira) callAPI(path string, method string, body io.Reader) ([]byte, error) {
 	// form http request
 	client := &http.Client{}
 	req, err := http.NewRequest(method, fmt.Sprintf("https://%s/%s", jira.Domain, path), body)
@@ -52,7 +52,7 @@ func (jira *Jira) callApi(path string, method string, body io.Reader) ([]byte, e
 	// non-200 status code
 	if resp.StatusCode < 200 || resp.StatusCode > 299 {
 		if len(respBody) > 0 {
-			var data map[string]interface{}
+			var data map[string]any
 			err = json.Unmarshal(respBody, &data)
 			if err != nil {
 				return nil, fmt.Errorf("failed to parse JSON response from Jira API: %w", err)
@@ -72,23 +72,23 @@ func (jira *Jira) callApi(path string, method string, body io.Reader) ([]byte, e
 	return respBody, nil
 }
 
-func (jira *Jira) getCurrentUserId() (string, error) {
+func (jira *Jira) getCurrentUserID() (string, error) {
 	// call api
 	path := "rest/api/3/myself"
-	resp, err := jira.callApi(path, "GET", nil)
+	resp, err := jira.callAPI(path, "GET", nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to call Jira API: %w", err)
 	}
 
 	// parse json
-	var data map[string]interface{}
+	var data map[string]any
 	err = json.Unmarshal(resp, &data)
 	if err != nil {
 		return "", fmt.Errorf("failed to unmarshal JSON response from Jira API: %w", err)
 	}
 
 	// transform json to output
-	accountId := data["accountId"].(string)
+	accountID := data["accountID"].(string)
 
-	return accountId, nil
+	return accountID, nil
 }

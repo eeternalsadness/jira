@@ -10,13 +10,13 @@ import (
 
 // NOTE: follow Jira API reference
 type Issue struct {
-	Id             string
+	ID             string
 	Key            string
 	Title          string
 	Description    string
 	Status         string
 	StatusCategory string
-	Url            string
+	URL            string
 }
 
 func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
@@ -24,26 +24,26 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 	jql := url.QueryEscape("assignee = currentuser() AND statuscategory != \"Done\"")
 	fields := url.QueryEscape("summary,status")
 	path := fmt.Sprintf("rest/api/3/search/jql?jql=%s&fields=%s", jql, fields)
-	resp, err := jira.callApi(path, "GET", nil)
+	resp, err := jira.callAPI(path, "GET", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call Jira API: %w", err)
 	}
 
 	// parse json data
-	var data map[string]interface{}
+	var data map[string]any
 	err = json.Unmarshal(resp, &data)
 	if err != nil {
 		return nil, fmt.Errorf("failed to unmarshal JSON response from Jira API: %w", err)
 	}
 
 	// transform json into output
-	issues := data["issues"].([]interface{})
+	issues := data["issues"].([]any)
 	outIssues := make([]Issue, len(issues))
 	for i, issue := range issues {
-		issueMap := issue.(map[string]interface{})
-		fieldsMap := issueMap["fields"].(map[string]interface{})
-		statusMap := fieldsMap["status"].(map[string]interface{})
-		statusCategoryMap := statusMap["statusCategory"].(map[string]interface{})
+		issueMap := issue.(map[string]any)
+		fieldsMap := issueMap["fields"].(map[string]any)
+		statusMap := fieldsMap["status"].(map[string]any)
+		statusCategoryMap := statusMap["statusCategory"].(map[string]any)
 
 		// get the necessary fields for the struct
 		id := issueMap["id"].(string)
@@ -53,23 +53,23 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 		statusCategory := statusCategoryMap["name"].(string)
 		url := issueMap["self"].(string)
 		outIssues[i] = Issue{
-			Id:             id,
+			ID:             id,
 			Key:            key,
 			Title:          title,
 			Description:    "",
 			Status:         status,
 			StatusCategory: statusCategory,
-			Url:            url,
+			URL:            url,
 		}
 	}
 
 	return outIssues, nil
 }
 
-func (jira *Jira) GetIssueById(issueId string) (Issue, error) {
+func (jira *Jira) GetIssueByID(issueID string) (Issue, error) {
 	fields := url.QueryEscape("summary,description,comment,status")
-	path := fmt.Sprintf("rest/api/3/issue/%s?fields=%s", issueId, fields)
-	resp, err := jira.callApi(path, "GET", nil)
+	path := fmt.Sprintf("rest/api/3/issue/%s?fields=%s", issueID, fields)
+	resp, err := jira.callAPI(path, "GET", nil)
 	if err != nil {
 		return Issue{}, fmt.Errorf("failed to call Jira API: %w", err)
 	}
@@ -105,13 +105,13 @@ func (jira *Jira) GetIssueById(issueId string) (Issue, error) {
 
 	// form return struct
 	outIssue := Issue{
-		Id:             id,
+		ID:             id,
 		Key:            key,
 		Title:          title,
 		Description:    description,
 		Status:         status,
 		StatusCategory: statusCategory,
-		Url:            url,
+		URL:            url,
 	}
 
 	return outIssue, nil
@@ -138,7 +138,7 @@ func getIssueDescriptionText(descriptionMap map[string]any) string {
 
 func (jira *Jira) CreateIssue(projectID string, issueTypeID string, title string, description string) (string, error) {
 	// get current user id
-	currentUserID, err := jira.getCurrentUserId()
+	currentUserID, err := jira.getCurrentUserID()
 	if err != nil {
 		return "", fmt.Errorf("failed to get current user ID: %w", err)
 	}
@@ -183,7 +183,7 @@ func (jira *Jira) CreateIssue(projectID string, issueTypeID string, title string
 
 	// call api
 	path := "rest/api/3/issue"
-	resp, err := jira.callApi(path, "POST", bytes.NewBuffer([]byte(body)))
+	resp, err := jira.callAPI(path, "POST", bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		return "", fmt.Errorf("failed to call Jira API: %w", err)
 	}

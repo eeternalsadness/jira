@@ -16,7 +16,7 @@ type Transition struct {
 func (jira *Jira) GetTransitions(issueID string) ([]Transition, error) {
 	// call api
 	path := fmt.Sprintf("rest/api/3/issue/%s/transitions", issueID)
-	resp, err := jira.callApi(path, "GET", nil)
+	resp, err := jira.callAPI(path, "GET", nil)
 	if err != nil {
 		return nil, fmt.Errorf("failed to call Jira API: %w", err)
 	}
@@ -58,7 +58,7 @@ func (jira *Jira) TransitionIssue(issueID string, transitionID string) error {
     }
   }`, transitionID)
 	path := fmt.Sprintf("rest/api/3/issue/%s/transitions", issueID)
-	resp, err := jira.callApi(path, "POST", bytes.NewBuffer([]byte(body)))
+	resp, err := jira.callAPI(path, "POST", bytes.NewBuffer([]byte(body)))
 	if err != nil {
 		return fmt.Errorf("failed to call Jira API: %w", err)
 	}
