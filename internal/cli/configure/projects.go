@@ -8,21 +8,10 @@ import (
 	"strings"
 
 	"github.com/eeternalsadness/jira/internal/util"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// configureProjectsCmd represents the configure projects command
-var configureProjectsCmd = &cobra.Command{
-	Use:   "projects",
-	Short: "Configure the list of available Jira projects",
-	Args:  cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
-		configureProjects()
-	},
-}
-
-func configureProjects() {
+func configureProjects() error {
 	reader := bufio.NewReader(os.Stdin)
 
 	// get current project ids
@@ -41,8 +30,7 @@ func configureProjects() {
 		projectIDString := strings.TrimSpace(userInputSlice[i])
 		projectIDInt, err := strconv.Atoi(projectIDString)
 		if err != nil {
-			fmt.Printf("Invalid project ID: %s", projectIDString)
-			return
+			return fmt.Errorf("invalid project ID: %s", projectIDString)
 		}
 		projectIDsNew = append(projectIDsNew, projectIDInt)
 	}
@@ -50,8 +38,7 @@ func configureProjects() {
 	if len(projectIDs) > 0 {
 		overwrite, err := util.UserYesNo("Overwrite existing project IDs?")
 		if err != nil {
-			fmt.Printf("%s\n", err)
-			return
+			return err
 		}
 
 		if overwrite {
@@ -66,8 +53,11 @@ func configureProjects() {
 	if len(projectIDs) > 0 {
 		// default to first project ID
 		defaultProjectID := projectIDs[0]
-		util.ViperUpsertInt("DefaultProjectID", "Enter the default project ID", strconv.Itoa(defaultProjectID))
+		err := util.ViperUpsertInt("DefaultProjectID", "Enter the default project ID", strconv.Itoa(defaultProjectID))
+		if err != nil {
+			return err
+		}
 	}
 
-	viper.WriteConfig()
+	return viper.WriteConfig()
 }

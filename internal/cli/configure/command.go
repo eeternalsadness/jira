@@ -22,11 +22,17 @@ THE SOFTWARE.
 package configure
 
 import (
-	"github.com/eeternalsadness/jira/pkg/jira"
+	"fmt"
+
+	"github.com/eeternalsadness/jira/internal/util"
 	"github.com/spf13/cobra"
 )
 
-var jiraClient jira.Jira
+var configurationOptions = []string{
+	"Credentials",
+	"IssueTypes",
+	"Projects",
+}
 
 // NewCommand creates and returns the issue command
 func NewCommand() *cobra.Command {
@@ -36,12 +42,38 @@ func NewCommand() *cobra.Command {
 		Long:    ``,
 		Example: ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return nil
+			configurationOption, err := selectConfigOption()
+			if err != nil {
+				return err
+			}
+
+			switch configurationOption {
+			case "Credentials":
+				return configureCredentials()
+			case "IssueTypes":
+				return configureIssueTypes()
+			case "Projects":
+				return configureProjects()
+			default:
+				return fmt.Errorf("invalid configuration option: %s", configurationOption)
+			}
 		},
 	}
 
-	// Add subcommands
-	// configureCmd.AddCommand()
-
 	return configureCmd
+}
+
+func selectConfigOption() (string, error) {
+	fmt.Println("Configuration options:")
+	err := util.PrettyPrintStringSlice(configurationOptions)
+	if err != nil {
+		return "", err
+	}
+
+	index, err := util.UserSelectFromRange(len(configurationOptions))
+	if err != nil {
+		return "", err
+	}
+
+	return configurationOptions[index], nil
 }
