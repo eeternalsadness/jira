@@ -70,12 +70,12 @@ func getIssue(cmd *cobra.Command, args []string) error {
 		w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 		fmt.Fprintln(w, "ID\tIssue\tStatus\tStatus Category\t")
 		for _, issue := range issues {
-			fmt.Fprintf(w, "%s\t[%s] %s\t%s\t%s\t\n", issue.Id, issue.Key, issue.Title, issue.Status, issue.StatusCategory)
+			fmt.Fprintf(w, "%s\t[%s] %s\t%s\t%s\t\n", issue.ID, issue.Key, issue.Title, issue.Status, issue.StatusCategory)
 		}
 		w.Flush()
 	} else {
 		issueID := args[0]
-		issue, err := jiraClient.GetIssueById(issueID)
+		issue, err := jiraClient.GetIssueByID(issueID)
 		if err != nil {
 			return fmt.Errorf("failed to get assigned issue: %s", err)
 		}

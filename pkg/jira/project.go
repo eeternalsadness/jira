@@ -15,7 +15,7 @@ type Project struct {
 
 func (jira *Jira) GetProjectByID(projectID int) (Project, error) {
 	path := fmt.Sprintf("rest/api/3/project/%d", projectID)
-	resp, err := jira.callApi(path, "GET", nil)
+	resp, err := jira.callAPI(path, "GET", nil)
 	if err != nil {
 		return Project{}, fmt.Errorf("failed to call Jira API: %w", err)
 	}

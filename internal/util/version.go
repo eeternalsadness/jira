@@ -120,7 +120,7 @@ func getLatestVersion() (string, error) {
 	}
 
 	// parse as json
-	var data map[string]interface{}
+	var data map[string]any
 	err = json.Unmarshal(respBody, &data)
 	if err != nil {
 		return "", fmt.Errorf("failed to parse response body as JSON: %w", err)
