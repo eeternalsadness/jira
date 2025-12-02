@@ -8,22 +8,10 @@ import (
 	"strings"
 
 	"github.com/eeternalsadness/jira/internal/util"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// configureIssueTypesCmd represents the configure projects command
-var configureIssueTypesCmd = &cobra.Command{
-	Use:     "issueTypes",
-	Aliases: []string{"types"},
-	Short:   "Configure the list of available issue types",
-	Args:    cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
-		configureIssueTypes()
-	},
-}
-
-func configureIssueTypes() {
+func configureIssueTypes() error {
 	reader := bufio.NewReader(os.Stdin)
 
 	// get current project ids
@@ -42,8 +30,7 @@ func configureIssueTypes() {
 		issueTypeIDString := strings.TrimSpace(userInputSlice[i])
 		issueTypeIDInt, err := strconv.Atoi(issueTypeIDString)
 		if err != nil {
-			fmt.Printf("Invalid project ID: %s", issueTypeIDString)
-			return
+			return fmt.Errorf("invalid project ID: %s", issueTypeIDString)
 		}
 		issueTypeIDsNew = append(issueTypeIDsNew, issueTypeIDInt)
 	}
@@ -51,8 +38,7 @@ func configureIssueTypes() {
 	if len(issueTypeIDs) > 0 {
 		overwrite, err := util.UserYesNo("Overwrite existing issue type IDs?")
 		if err != nil {
-			fmt.Printf("%s\n", err)
-			return
+			return err
 		}
 
 		if overwrite {
@@ -67,8 +53,11 @@ func configureIssueTypes() {
 	if len(issueTypeIDs) > 0 {
 		// default to first issue type ID
 		defaultIssueTypeID := issueTypeIDs[0]
-		util.ViperUpsertInt("DefaultIssueTypeID", "Enter the default issue type ID", strconv.Itoa(defaultIssueTypeID))
+		err := util.ViperUpsertInt("DefaultIssueTypeID", "Enter the default issue type ID", strconv.Itoa(defaultIssueTypeID))
+		if err != nil {
+			return err
+		}
 	}
 
-	viper.WriteConfig()
+	return viper.WriteConfig()
 }

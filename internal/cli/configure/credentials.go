@@ -4,21 +4,10 @@ import (
 	"fmt"
 
 	"github.com/eeternalsadness/jira/internal/util"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
-// configureCmd represents the configure command
-var configureCmd = &cobra.Command{
-	Use:   "configure",
-	Short: "Configure Jira domain and credentials",
-	Args:  cobra.ExactArgs(0),
-	Run: func(cmd *cobra.Command, args []string) {
-		configure()
-	},
-}
-
-func configure() error {
+func configureCredentials() error {
 	// configure jira domain
 	err := util.ViperUpsertString("Domain", "Enter the Jira domain", "example.atlassian.net")
 	if err != nil {
