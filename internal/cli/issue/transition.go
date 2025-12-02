@@ -85,7 +85,12 @@ func selectTransition(transitions []jira.Transition) (jira.Transition, error) {
 
 	// prompt user for transition
 	fmt.Println("Available transitions:")
-	transitionIndex, err := util.UserSelectFromRange(headerMap, transitions)
+	err := util.PrettyPrintStructSlice(headerMap, transitions)
+	if err != nil {
+		return jira.Transition{}, err
+	}
+
+	transitionIndex, err := util.UserSelectFromRange(len(transitions))
 	if err != nil {
 		return jira.Transition{}, err
 	}
