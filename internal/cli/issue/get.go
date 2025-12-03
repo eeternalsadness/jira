@@ -35,9 +35,8 @@ func newGetCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:   "get",
 		Short: "Get your current Jira issues",
-		Long: `Get Jira issues that are assigned to the current user (you).
-	Issues with status category 'Done' are not returned.`,
-		Args: cobra.MaximumNArgs(1),
+		Long:  `Get Jira issues that are assigned to the current user (you). Issues with status category 'Done' are not returned.`,
+		Args:  cobra.MaximumNArgs(1),
 		Example: `# Get all your assigned issues
 jira issue get --all
 
