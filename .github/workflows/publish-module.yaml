@@ -21,6 +21,10 @@ jobs:
         with:
           go-version: ${{ env.GO_VERSION }}
 
+      # need to do this due to weird connection errors with go list -m
+      - name: "Clean Go module cache"
+        run: go clean -modcache
+
       - name: "Publish module"
         run: GOPROXY=proxy.golang.org go list -m github.com/eeternalsadness/jira@${GITHUB_REF#refs/tags/}
 
