@@ -101,7 +101,7 @@ Only **user-facing changes** should be documented in the changelog. This include
 
 ### Format
 
-Follow [Keep a Changelog](https://keepachangelog.com/) format:
+Follow [Keep a Changelog](https://keepachangelog.com/) format. Use the version from the `Version` field in `rootCmd` in `cmd/root.go`:
 
 ```markdown
 ## [Version] - YYYY-MM-DD
