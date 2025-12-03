@@ -15,16 +15,39 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: "Set up Go"
         uses: actions/setup-go@v5
         with:
           go-version: ${{ env.GO_VERSION }}
+
       - name: "Publish module"
         run: GOPROXY=proxy.golang.org go list -m github.com/eeternalsadness/jira@${GITHUB_REF#refs/tags/}
+
+      - name: "Extract changelog section"
+        id: changelog
+        run: |
+          VERSION="${GITHUB_REF#refs/tags/}"
+
+          echo "Extracting changelog for version $VERSION"
+
+          awk "
+            BEGIN {found=0}
+            /^## \\[/ {
+              if (found) exit;
+              if (\$0 ~ \"\\[$VERSION\\]\") found=1;
+            }
+            found {print}
+          " CHANGELOG.md > RELEASE_NOTES.md
+
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
       - name: "Create release"
         uses: softprops/action-gh-release@v2
         with:
-          body_path: CHANGELOG.md
+          body: ${{ steps.changelog.outputs.notes }}
           prerelease: false
           token: ${{ secrets.RELEASE_TOKEN }}
           make_latest: "true"
