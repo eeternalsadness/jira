@@ -100,5 +100,5 @@ func selectTransition(transitions []jira.Transition) (jira.Transition, error) {
 		return jira.Transition{}, nil
 	}
 
-	return transitions[transitionIndex-1], nil
+	return transitions[transitionIndex], nil
 }
