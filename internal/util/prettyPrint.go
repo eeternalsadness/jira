@@ -73,7 +73,7 @@ func PrettyPrintStringSlice(stringSlice []string) error {
 
 	// print out string slice
 	for i, str := range stringSlice {
-		fmt.Fprintf(w, fmt.Sprintf("%d\t%s\t\n", i, str))
+		fmt.Fprintf(w, fmt.Sprintf("%d\t%s\t\n", i+1, str))
 	}
 	w.Flush()
 
