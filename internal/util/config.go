@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path"
 
 	"github.com/eeternalsadness/jira/pkg/jira"
 	"github.com/spf13/cobra"
@@ -12,16 +13,25 @@ import (
 
 func InitConfig(cmd *cobra.Command) (jira.Jira, error) {
 	if cfgFile := viper.GetString("config"); cfgFile != "" {
-		// Use config file from the flag.
+		// use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Find home directory.
+		// find home directory.
 		home, err := os.UserHomeDir()
 		cobra.CheckErr(err)
 
 		viper.AddConfigPath(fmt.Sprintf("%s/.config/jira/", home))
 		viper.SetConfigName("config")
 		viper.SetConfigType("yaml")
+
+		// set config key to default config file
+		viper.Set("config", fmt.Sprintf("%s/.config/jira/config.yaml", home))
+	}
+
+	// make sure config dir is created
+	cfgDir := path.Dir(viper.GetString("config"))
+	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
+		return jira.Jira{}, err
 	}
 
 	if err := viper.ReadInConfig(); err != nil {

@@ -90,13 +90,14 @@ func getLastCheckVersionTime() (time.Time, error) {
 
 func updateLastCheckVersionTime() error {
 	// make sure tmp dir is set up
-	err := os.MkdirAll(tmpDir, 0o755)
-	cobra.CheckErr(err)
+	if err := os.MkdirAll(tmpDir, 0o755); err != nil {
+		return err
+	}
 
 	// write to file
 	// TODO: maybe put this in the config file
 	tmpFilePath := fmt.Sprintf("%s/lastCheckVersionTime", tmpDir)
-	err = os.WriteFile(tmpFilePath, []byte(strconv.FormatInt(time.Now().Unix(), 10)), 0o755)
+	err := os.WriteFile(tmpFilePath, []byte(strconv.FormatInt(time.Now().Unix(), 10)), 0o755)
 	return err
 }
 
