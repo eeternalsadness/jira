@@ -77,3 +77,63 @@ jira create issue`,
 }
 ```
 
+## Changelog Guidelines
+
+### What to Include
+
+Only **user-facing changes** should be documented in the changelog. This includes:
+
+- New CLI commands or subcommands
+- New command-line flags or options
+- Changes to existing command behavior
+- Breaking changes to command syntax or output format
+- Bug fixes that affect user experience
+- Performance improvements that users would notice
+
+### What NOT to Include
+
+- Internal code refactoring
+- Test changes or additions
+- Documentation-only updates (unless they affect command help text)
+- Build system changes
+- Dependency updates (unless they change functionality)
+- Code style or linting fixes
+
+### Format
+
+Follow [Keep a Changelog](https://keepachangelog.com/) format:
+
+```markdown
+## [Version] - YYYY-MM-DD
+
+### Added
+- New features
+
+### Changed
+- Changes in existing functionality
+
+### Deprecated
+- Soon-to-be removed features
+
+### Removed
+- Now removed features
+
+### Fixed
+- Bug fixes
+
+### Security
+- Security vulnerabilities
+```
+
+### Examples
+
+**Good changelog entries:**
+- `Added: New --format flag to 'jira get issue' command for JSON/table output`
+- `Changed: Issue creation now prompts for project selection if not specified`
+- `Fixed: Error handling when Jira server is unreachable`
+
+**Bad changelog entries:**
+- `Refactored HTTP client to use context`
+- `Added unit tests for configuration module`
+- `Updated Go dependencies to latest versions`
+
