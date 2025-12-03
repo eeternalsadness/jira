@@ -37,10 +37,8 @@ var configurationOptions = []string{
 // NewCommand creates and returns the issue command
 func NewCommand() *cobra.Command {
 	configureCmd := &cobra.Command{
-		Use:     "configure",
-		Short:   "",
-		Long:    ``,
-		Example: ``,
+		Use:   "configure",
+		Short: "Configure credentials, issue types, or projects for the CLI tool",
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			_, err := util.InitConfig(cmd)
 			return err
