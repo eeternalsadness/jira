@@ -27,6 +27,10 @@ func InitConfig(cmd *cobra.Command) (jira.Jira, error) {
 	if err := viper.ReadInConfig(); err != nil {
 		var configFileNotFoundErr viper.ConfigFileNotFoundError
 		if errors.As(err, &configFileNotFoundErr) {
+			// ignore this error for the configure command
+			if cmd.Name() == "configure" {
+				return jira.Jira{}, nil
+			}
 			fmt.Println("Config file not found! Please run 'jira configure' to configure your Jira credentials.")
 		}
 		return jira.Jira{}, err

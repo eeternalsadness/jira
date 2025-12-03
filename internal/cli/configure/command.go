@@ -30,7 +30,7 @@ import (
 
 var configurationOptions = []string{
 	"Credentials",
-	"IssueTypes",
+	"Issue types",
 	"Projects",
 }
 
@@ -41,6 +41,10 @@ func NewCommand() *cobra.Command {
 		Short:   "",
 		Long:    ``,
 		Example: ``,
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			_, err := util.InitConfig(cmd)
+			return err
+		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configurationOption, err := selectConfigOption()
 			if err != nil || configurationOption == "" {
@@ -50,7 +54,7 @@ func NewCommand() *cobra.Command {
 			switch configurationOption {
 			case "Credentials":
 				return configureCredentials()
-			case "IssueTypes":
+			case "Issue types":
 				return configureIssueTypes()
 			case "Projects":
 				return configureProjects()
