@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.2.1] - 2025-12-03
+
+### Fixed
+- Fixed off-by-one error in issue transition selection causing incorrect transition to be applied
+
 ## [v0.2.0] - 2025-12-03
 
 ### Added
