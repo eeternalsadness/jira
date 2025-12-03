@@ -43,7 +43,7 @@ func NewCommand() *cobra.Command {
 		Example: ``,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configurationOption, err := selectConfigOption()
-			if err != nil {
+			if err != nil || configurationOption == "" {
 				return err
 			}
 
@@ -73,6 +73,11 @@ func selectConfigOption() (string, error) {
 	index, err := util.UserSelectFromRange(len(configurationOptions))
 	if err != nil {
 		return "", err
+	}
+
+	// user quits
+	if index == -1 {
+		return "", nil
 	}
 
 	return configurationOptions[index], nil
