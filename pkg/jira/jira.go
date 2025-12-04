@@ -9,11 +9,9 @@ import (
 )
 
 type Jira struct {
-	Domain             string
-	Email              string
-	Token              string
-	DefaultProjectID   string
-	DefaultIssueTypeID string
+	Domain string
+	Email  string
+	Token  string
 }
 
 func (jira *Jira) getAuthToken() string {

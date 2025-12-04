@@ -11,7 +11,7 @@ func configureCredentials() error {
 	// configure jira domain
 	example := "example.atlassian.net"
 	err := util.ViperUpsertString(
-		"Domain",
+		"domain",
 		"Enter the Jira domain",
 		&example,
 		false)
@@ -22,7 +22,7 @@ func configureCredentials() error {
 	// configure jira email
 	example = "example@example.com"
 	err = util.ViperUpsertString(
-		"Email",
+		"email",
 		"Enter the email address used for Jira",
 		&example,
 		false)
@@ -32,7 +32,7 @@ func configureCredentials() error {
 
 	// configure jira api token
 	err = util.ViperUpsertString(
-		"Token",
+		"token",
 		"Enter the Jira API token",
 		nil,
 		true)
