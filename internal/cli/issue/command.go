@@ -48,7 +48,7 @@ jira issue create
 jira issue transition PROJ-123`,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			var err error
-			if cmd.HasParent() && cmd.Parent().PersistentPreRunE != nil {
+			if cmd.HasParent() {
 				if err = cmd.Parent().PersistentPreRunE(cmd.Parent(), args); err != nil {
 					return err
 				}
