@@ -48,15 +48,11 @@ jira issue create
 # Create a Jira issue with a specific project and issue type
 jira issue create --project-id 123 --issue-type-id 456`,
 		PreRun: func(cmd *cobra.Command, args []string) {
-			if cmd.Flags().Changed("project-id") {
-				projectID = viper.GetString("project-id")
-			} else {
+			if projectID == "" {
 				projectID = viper.GetString("DefaultProjectId")
 			}
 
-			if cmd.Flags().Changed("issue-type-id") {
-				issueTypeID = viper.GetString("issue-type-id")
-			} else {
+			if issueTypeID == "" {
 				issueTypeID = viper.GetString("DefaultIssueTypeId")
 			}
 		},
