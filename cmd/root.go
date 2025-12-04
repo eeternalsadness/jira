@@ -32,12 +32,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var cfgFile string
+
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "jira",
 	Short:   "A CLI tool to do common Jira tasks",
 	Long:    `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
 	Version: "v0.2.1",
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		return util.InitConfig(cmd, cfgFile)
+	},
 	PersistentPostRunE: func(cmd *cobra.Command, args []string) error {
 		return util.CheckVersion(cmd)
 	},
@@ -51,7 +56,7 @@ func Execute() {
 }
 
 func init() {
-	rootCmd.PersistentFlags().StringP("config", "c", "", "config file (default is $HOME/.config/jira/config.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.config/jira/config.yaml)")
 
 	rootCmd.AddCommand(issue.NewCommand())
 	rootCmd.AddCommand(configure.NewCommand())

@@ -39,10 +39,6 @@ func NewCommand() *cobra.Command {
 	configureCmd := &cobra.Command{
 		Use:   "configure",
 		Short: "Configure credentials, issue types, or projects for the CLI tool",
-		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-			_, err := util.InitConfig(cmd)
-			return err
-		},
 		RunE: func(cmd *cobra.Command, args []string) error {
 			configurationOption, err := selectConfigOption()
 			if err != nil || configurationOption == "" {

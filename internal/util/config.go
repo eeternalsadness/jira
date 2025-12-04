@@ -11,8 +11,8 @@ import (
 	"github.com/spf13/viper"
 )
 
-func InitConfig(cmd *cobra.Command) (jira.Jira, error) {
-	if cfgFile := viper.GetString("config"); cfgFile != "" {
+func InitConfig(cmd *cobra.Command, cfgFile string) error {
+	if cfgFile != "" {
 		// use config file from the flag.
 		viper.SetConfigFile(cfgFile)
 	} else {
@@ -25,31 +25,33 @@ func InitConfig(cmd *cobra.Command) (jira.Jira, error) {
 		viper.SetConfigType("yaml")
 
 		// set config key to default config file
-		viper.Set("config", fmt.Sprintf("%s/.config/jira/config.yaml", home))
+		// viper.Set("config", fmt.Sprintf("%s/.config/jira/config.yaml", home))
+		cfgFile = fmt.Sprintf("%s/.config/jira/config.yaml", home)
 	}
 
 	// make sure config dir is created
-	cfgDir := path.Dir(viper.GetString("config"))
+	cfgDir := path.Dir(cfgFile)
 	if err := os.MkdirAll(cfgDir, 0o755); err != nil {
-		return jira.Jira{}, err
+		return err
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
 		var configFileNotFoundErr viper.ConfigFileNotFoundError
 		if errors.As(err, &configFileNotFoundErr) {
-			// ignore this error for the configure command
+			// if running configure, set the config file
 			if cmd.Name() == "configure" {
-				return jira.Jira{}, nil
+				viper.SetConfigFile(cfgFile)
+				return nil
 			}
 			fmt.Println("Config file not found! Please run 'jira configure' to configure your Jira credentials.")
 		}
-		return jira.Jira{}, err
+		return err
 	}
 
-	if err := viper.BindPFlags(cmd.Flags()); err != nil {
-		return jira.Jira{}, err
-	}
+	return viper.BindPFlags(cmd.Flags())
+}
 
+func InitJiraConfig() (jira.Jira, error) {
 	// get jira config
 	var jiraClient jira.Jira
 	if err := viper.Unmarshal(&jiraClient); err != nil {
