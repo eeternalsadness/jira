@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.2.2] - 2025-12-04
+
+### Added
+- Headers added to selection lists for improved clarity
+
+### Changed
+- **BREAKING**: Configuration file format changed from CamelCase to kebab-case keys (e.g., `Domain` → `domain`, `ProjectIDs` → `project-ids`, `IssueTypeIDs` → `issue-type-ids`, `DefaultProjectID` → `default-project-id`, `DefaultIssueTypeID` → `default-issue-type-id`)
+
 ## [v0.2.1] - 2025-12-03
 
 ### Fixed
