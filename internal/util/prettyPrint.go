@@ -71,6 +71,8 @@ func PrettyPrintStructSlice[T any](headerMap map[string]string, structSlice []T)
 func PrettyPrintStringSlice(stringSlice []string) error {
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 
+	fmt.Fprintln(w, "#\tName\t")
+
 	// print out string slice
 	for i, str := range stringSlice {
 		fmt.Fprintf(w, fmt.Sprintf("%d\t%s\t\n", i+1, str))
