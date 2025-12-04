@@ -39,7 +39,7 @@ var rootCmd = &cobra.Command{
 	Use:     "jira",
 	Short:   "A CLI tool to do common Jira tasks",
 	Long:    `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
-	Version: "v0.2.1",
+	Version: "v0.2.2",
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 		return util.InitConfig(cmd, cfgFile)
 	},
