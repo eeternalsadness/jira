@@ -53,7 +53,10 @@ func configureProjects() error {
 	if len(projectIDs) > 0 {
 		// default to first project ID
 		defaultProjectID := projectIDs[0]
-		err := util.ViperUpsertInt("DefaultProjectID", "Enter the default project ID", strconv.Itoa(defaultProjectID))
+		err := util.ViperUpsertInt(
+			"DefaultProjectID",
+			"Enter the default project ID",
+			&defaultProjectID)
 		if err != nil {
 			return err
 		}

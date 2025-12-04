@@ -53,7 +53,10 @@ func configureIssueTypes() error {
 	if len(issueTypeIDs) > 0 {
 		// default to first issue type ID
 		defaultIssueTypeID := issueTypeIDs[0]
-		err := util.ViperUpsertInt("DefaultIssueTypeID", "Enter the default issue type ID", strconv.Itoa(defaultIssueTypeID))
+		err := util.ViperUpsertInt(
+			"DefaultIssueTypeID",
+			"Enter the default issue type ID",
+			&defaultIssueTypeID)
 		if err != nil {
 			return err
 		}
