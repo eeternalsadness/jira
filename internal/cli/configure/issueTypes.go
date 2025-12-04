@@ -15,7 +15,7 @@ func configureIssueTypes() error {
 	reader := bufio.NewReader(os.Stdin)
 
 	// get current project ids
-	issueTypeIDs := viper.GetIntSlice("IssueTypeIDs")
+	issueTypeIDs := viper.GetIntSlice("issue-type-ids")
 	fmt.Println("Current issue type IDs:")
 	fmt.Println(issueTypeIDs)
 
@@ -42,19 +42,19 @@ func configureIssueTypes() error {
 		}
 
 		if overwrite {
-			viper.Set("IssueTypeIDs", issueTypeIDsNew)
+			viper.Set("issue-type-ids", issueTypeIDsNew)
 		}
 	} else {
-		viper.Set("IssueTypeIDs", issueTypeIDsNew)
+		viper.Set("issue-type-ids", issueTypeIDsNew)
 	}
 
 	// set default issue type ID
-	issueTypeIDs = viper.GetIntSlice("IssueTypeIDs")
+	issueTypeIDs = viper.GetIntSlice("issue-type-ids")
 	if len(issueTypeIDs) > 0 {
 		// default to first issue type ID
 		defaultIssueTypeID := issueTypeIDs[0]
 		err := util.ViperUpsertInt(
-			"DefaultIssueTypeID",
+			"default-issue-type-id",
 			"Enter the default issue type ID",
 			&defaultIssueTypeID)
 		if err != nil {

@@ -15,7 +15,7 @@ func configureProjects() error {
 	reader := bufio.NewReader(os.Stdin)
 
 	// get current project ids
-	projectIDs := viper.GetIntSlice("ProjectIDs")
+	projectIDs := viper.GetIntSlice("project-ids")
 	fmt.Println("Current project IDs:")
 	fmt.Println(projectIDs)
 
@@ -42,19 +42,19 @@ func configureProjects() error {
 		}
 
 		if overwrite {
-			viper.Set("ProjectIDs", projectIDsNew)
+			viper.Set("project-ids", projectIDsNew)
 		}
 	} else {
-		viper.Set("ProjectIDs", projectIDsNew)
+		viper.Set("project-ids", projectIDsNew)
 	}
 
 	// set default project ID
-	projectIDs = viper.GetIntSlice("ProjectIDs")
+	projectIDs = viper.GetIntSlice("project-ids")
 	if len(projectIDs) > 0 {
 		// default to first project ID
 		defaultProjectID := projectIDs[0]
 		err := util.ViperUpsertInt(
-			"DefaultProjectID",
+			"default-project-id",
 			"Enter the default project ID",
 			&defaultProjectID)
 		if err != nil {
