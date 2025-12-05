@@ -16,13 +16,15 @@ type Issue struct {
 	Description    string
 	Status         string
 	StatusCategory string
+	ProjectID      string
+	IssueTypeID    string
 	URL            string
 }
 
 func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 	// call api
 	jql := url.QueryEscape("assignee = currentuser() AND statuscategory != \"Done\"")
-	fields := url.QueryEscape("summary,status")
+	fields := url.QueryEscape("summary,status,project,issuetype")
 	path := fmt.Sprintf("rest/api/3/search/jql?jql=%s&fields=%s", jql, fields)
 	resp, err := jira.callAPI(path, "GET", nil)
 	if err != nil {
@@ -44,6 +46,8 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 		fieldsMap := issueMap["fields"].(map[string]any)
 		statusMap := fieldsMap["status"].(map[string]any)
 		statusCategoryMap := statusMap["statusCategory"].(map[string]any)
+		projectMap := fieldsMap["project"].(map[string]any)
+		issueTypeMap := fieldsMap["issuetype"].(map[string]any)
 
 		// get the necessary fields for the struct
 		id := issueMap["id"].(string)
@@ -51,6 +55,8 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 		title := fieldsMap["summary"].(string)
 		status := statusMap["name"].(string)
 		statusCategory := statusCategoryMap["name"].(string)
+		projectID := projectMap["id"].(string)
+		issueTypeID := issueTypeMap["id"].(string)
 		url := issueMap["self"].(string)
 		outIssues[i] = Issue{
 			ID:             id,
@@ -59,6 +65,8 @@ func (jira *Jira) GetAssignedIssues() ([]Issue, error) {
 			Description:    "",
 			Status:         status,
 			StatusCategory: statusCategory,
+			ProjectID:      projectID,
+			IssueTypeID:    issueTypeID,
 			URL:            url,
 		}
 	}
