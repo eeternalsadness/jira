@@ -40,6 +40,13 @@ const (
 	githubEndpoint       = "https://api.github.com/repos/eeternalsadness/jira/releases/latest"
 )
 
+// NOTE: inject these in the build process with -ldflags
+var (
+	Version      string
+	GoVersion    string
+	GitCommitSHA string
+)
+
 func CheckVersion(cmd *cobra.Command) error {
 	// only check every once in a while
 	// lastCheckVersionTime, err := getLastCheckVersionTime()
