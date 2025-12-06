@@ -25,13 +25,17 @@ import (
 	"fmt"
 
 	"github.com/eeternalsadness/jira/internal/util"
-	"github.com/eeternalsadness/jira/pkg/jira"
 	"github.com/spf13/cobra"
 )
 
-var jiraClient jira.Jira
+// NOTE: inject these in the build process with -ldflags
+var (
+	Version      string
+	GoVersion    string
+	GitCommitSHA string
+)
 
-// NewCommand creates and returns the issue command
+// NewCommand creates and returns the version command
 func NewCommand() *cobra.Command {
 	versionCmd := &cobra.Command{
 		Use:   "version",
@@ -41,7 +45,9 @@ func NewCommand() *cobra.Command {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Printf("%s version %s", cmd.Root().Name(), cmd.Root().Version)
+			fmt.Printf("%s version %s\n", cmd.Root().Name(), Version)
+			fmt.Printf("Go version: %s\n", GoVersion)
+			fmt.Printf("Git commit SHA: %s\n", GitCommitSHA)
 			return util.CheckVersion(cmd)
 		},
 	}
