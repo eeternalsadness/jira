@@ -1,12 +1,15 @@
 name: Build Module
 run-name: Build Module
-on:
-  pull_request:
-    branches:
-      - main
 
-env:
-  GO_VERSION: "1.23.x"
+on:
+  workflow_call:
+    inputs:
+      app-version:
+        required: true
+        type: string
+      go-version:
+        required: true
+        type: string
 
 jobs:
   build:
@@ -19,10 +22,33 @@ jobs:
       - name: "Set up Go"
         uses: actions/setup-go@v5
         with:
-          go-version: ${{ env.GO_VERSION }}
+          go-version: ${{ inputs.go-version }}
 
       - name: "Install dependencies"
         run: go get
 
       - name: Build
-        run: go build -v
+        env:
+          VERSION: ${{ inputs.app-version }}
+          GO_VERSION: ${{ inputs.go-version }}
+        run: |
+          # multi platform build
+          platforms="linux/amd64 linux/arm64 darwin/arm64"
+
+          for plat in $platforms; do
+            GOOS=${plat%/*}
+            GOARCH=${plat#*/}
+
+            output="jira-${GOOS}-${GOARCH}"
+
+            go build -v -o "$output"\
+              -ldflags "-X github.com/eeternalsadness/jira/internal/util.Version=${VERSION} \
+                        -X github.com/eeternalsadness/jira/internal/util.GoVersion=${GO_VERSION} \
+                        -X github.com/eeternalsadness/jira/internal/util.GitCommitSHA=${GITHUB_SHA}"
+          done
+
+      - name: "Upload artifact"
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifact
+          path: jira-*-*
