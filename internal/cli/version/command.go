@@ -19,44 +19,32 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 */
-package cmd
+package version
 
 import (
-	"os"
-
-	"github.com/eeternalsadness/jira/internal/cli/configure"
-	"github.com/eeternalsadness/jira/internal/cli/issue"
-	"github.com/eeternalsadness/jira/internal/cli/version"
+	"fmt"
 
 	"github.com/eeternalsadness/jira/internal/util"
-
+	"github.com/eeternalsadness/jira/pkg/jira"
 	"github.com/spf13/cobra"
 )
 
-var cfgFile string
+var jiraClient jira.Jira
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
-	Use:     "jira",
-	Short:   "A CLI tool to do common Jira tasks",
-	Long:    `This CLI tool aims to carry out common Jira tasks, helping you to stay in the command line instead of breaking your workflow and going to your web browser for Jira tasks.`,
-	Version: "v0.2.2",
-	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		return util.InitConfig(cmd, cfgFile)
-	},
-}
-
-func Execute() {
-	err := rootCmd.Execute()
-	if err != nil {
-		os.Exit(1)
+// NewCommand creates and returns the issue command
+func NewCommand() *cobra.Command {
+	versionCmd := &cobra.Command{
+		Use:   "version",
+		Short: "Show the version for the jira CLI tool",
+		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+			// override the root's PersistentPreRunE since we don't need to init config
+			return nil
+		},
+		RunE: func(cmd *cobra.Command, args []string) error {
+			fmt.Printf("%s version %s", cmd.Root().Name(), cmd.Root().Version)
+			return util.CheckVersion(cmd)
+		},
 	}
-}
 
-func init() {
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is $HOME/.config/jira/config.yaml)")
-
-	rootCmd.AddCommand(issue.NewCommand())
-	rootCmd.AddCommand(configure.NewCommand())
-	rootCmd.AddCommand(version.NewCommand())
+	return versionCmd
 }

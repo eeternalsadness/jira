@@ -42,24 +42,24 @@ const (
 
 func CheckVersion(cmd *cobra.Command) error {
 	// only check every once in a while
-	lastCheckVersionTime, err := getLastCheckVersionTime()
-	if err != nil {
-		return err
-	}
+	// lastCheckVersionTime, err := getLastCheckVersionTime()
+	// if err != nil {
+	// 	return err
+	// }
 
 	// still within version check cooldown, do nothing
-	if time.Since(lastCheckVersionTime) < checkVersionInterval {
-		return nil
-	}
+	// if time.Since(lastCheckVersionTime) < checkVersionInterval {
+	// 	return nil
+	// }
 
 	latestVersion, err := getLatestVersion()
 	if err != nil {
 		return err
 	}
 
-	if err := updateLastCheckVersionTime(); err != nil {
-		return err
-	}
+	// if err := updateLastCheckVersionTime(); err != nil {
+	// 	return err
+	// }
 
 	if latestVersion != cmd.Root().Version {
 		// TODO: potentially add an update command instead of telling the user to update manually
