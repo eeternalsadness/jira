@@ -47,8 +47,8 @@ jobs:
                         -X github.com/eeternalsadness/jira/internal/util.GitCommitSHA=${GITHUB_SHA}"
           done
 
-      - name: "Upload artifact"
+      - name: "Upload build artifacts"
         uses: actions/upload-artifact@v4
         with:
           name: build-artifact
-          path: jira-*-*
+          path: "jira-*-*"

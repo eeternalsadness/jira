@@ -52,6 +52,9 @@ jobs:
           cat RELEASE_NOTES.md >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
 
+      - name: "Download build artifacts"
+        uses: actions/download-artifact@v5
+
       - name: "Create release"
         uses: softprops/action-gh-release@v2
         with:
@@ -59,3 +62,4 @@ jobs:
           prerelease: false
           token: ${{ secrets.RELEASE_TOKEN }}
           make_latest: "true"
+          files: "jira-*-*"
