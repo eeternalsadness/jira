@@ -1,0 +1,23 @@
+name: Tag
+
+on:
+  push:
+    tags:
+      - v*.*.*
+
+env:
+  VERSION: ${{ github.ref_name }}
+  GO_VERSION: "1.23.x"
+
+jobs:
+  build:
+    uses: ./build-module.yaml
+    with:
+      app-version: ${{ env.VERSION }}
+      go-version: ${{ env.GO_VERSION }}
+
+  publish:
+    uses: ./publish-module.yaml
+    with:
+      app-version: ${{ env.VERSION }}
+      go-version: ${{ env.GO_VERSION }}
