@@ -28,13 +28,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// NOTE: inject these in the build process with -ldflags
-var (
-	Version      string
-	GoVersion    string
-	GitCommitSHA string
-)
-
 // NewCommand creates and returns the version command
 func NewCommand() *cobra.Command {
 	versionCmd := &cobra.Command{
@@ -45,9 +38,9 @@ func NewCommand() *cobra.Command {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
-			fmt.Printf("%s version %s\n", cmd.Root().Name(), Version)
-			fmt.Printf("Go version: %s\n", GoVersion)
-			fmt.Printf("Git commit SHA: %s\n", GitCommitSHA)
+			fmt.Printf("%s version %s\n", cmd.Root().Name(), util.Version)
+			fmt.Printf("Go version: %s\n", util.GoVersion)
+			fmt.Printf("Git commit SHA: %s\n", util.GitCommitSHA)
 			return util.CheckVersion(cmd)
 		},
 	}
