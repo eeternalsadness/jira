@@ -101,7 +101,7 @@ Only **user-facing changes** should be documented in the changelog. This include
 
 ### Format
 
-Follow [Keep a Changelog](https://keepachangelog.com/) format. Use the version from the `Version` field in `rootCmd` in `cmd/root.go`:
+Follow [Keep a Changelog](https://keepachangelog.com/) format.
 
 ```markdown
 ## [Version] - YYYY-MM-DD
@@ -128,12 +128,13 @@ Follow [Keep a Changelog](https://keepachangelog.com/) format. Use the version f
 ### Examples
 
 **Good changelog entries:**
+
 - `Added: New --format flag to 'jira get issue' command for JSON/table output`
 - `Changed: Issue creation now prompts for project selection if not specified`
 - `Fixed: Error handling when Jira server is unreachable`
 
 **Bad changelog entries:**
+
 - `Refactored HTTP client to use context`
 - `Added unit tests for configuration module`
 - `Updated Go dependencies to latest versions`
-
