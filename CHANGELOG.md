@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.2.3] - 2025-12-06
+
+### Added
+- `jira version` to show current version, Go version, and git commit SHA
+
+### Changed
+- **BREAKING**: Removed `--version` and `-v` options
+- Removed automatic version check. Moved to on-demand version check with `jira version`
+
 ## [v0.2.2] - 2025-12-04
 
 ### Added
