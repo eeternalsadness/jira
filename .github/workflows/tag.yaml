@@ -6,21 +6,17 @@ on:
     tags:
       - v*.*.*
 
-env:
-  VERSION: ${{ github.ref_name }}
-  GO_VERSION: "1.23.x"
-
 jobs:
   build:
-    uses: ./.github/workflows/build-module.yaml
+    uses: "./.github/workflows/build-module.yaml"
     with:
-      app-version: ${{ env.VERSION }}
-      go-version: ${{ env.GO_VERSION }}
+      app-version: ${{ github.ref_name }}
+      go-version: "1.23.x"
 
   publish:
-    uses: ./.github/workflows/publish-module.yaml
+    uses: "./.github/workflows/publish-module.yaml"
     with:
-      app-version: ${{ env.VERSION }}
-      go-version: ${{ env.GO_VERSION }}
+      app-version: ${{ github.ref_name }}
+      go-version: "1.23.x"
     secrets:
       release-token: ${{ secrets.RELEASE_TOKEN }}
