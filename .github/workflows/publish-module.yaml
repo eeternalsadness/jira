@@ -67,4 +67,6 @@ jobs:
           prerelease: false
           token: ${{ secrets.release-token }}
           make_latest: "true"
-          files: "jira-*-*"
+          files: |
+            jira-*-*
+            !jira-api-call.sh
