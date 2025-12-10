@@ -10,6 +10,9 @@ on:
       go-version:
         required: true
         type: string
+    secrets:
+      release-token:
+        required: true
 
 env:
   VERSION: ${{ inputs.app-version }}
@@ -60,6 +63,6 @@ jobs:
         with:
           body: ${{ steps.changelog.outputs.notes }}
           prerelease: false
-          token: ${{ secrets.RELEASE_TOKEN }}
+          token: ${{ secrets.release-token }}
           make_latest: "true"
           files: "jira-*-*"
