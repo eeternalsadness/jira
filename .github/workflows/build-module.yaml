@@ -36,12 +36,12 @@ jobs:
           platforms="linux/amd64 linux/arm64 darwin/arm64"
 
           for plat in $platforms; do
-            GOOS=${plat%/*}
-            GOARCH=${plat#*/}
+            go_os=${plat%/*}
+            go_arch=${plat#*/}
 
-            output="jira-${GOOS}-${GOARCH}"
+            output="jira-${go_os}-${go_arch}"
 
-            go build -v -o "$output"\
+            GOOS=${go_os} GOARCH=${go_arch} go build -v -o "$output"\
               -ldflags "-X github.com/eeternalsadness/jira/internal/util.Version=${VERSION} \
                         -X github.com/eeternalsadness/jira/internal/util.GoVersion=${GO_VERSION} \
                         -X github.com/eeternalsadness/jira/internal/util.GitCommitSHA=${GITHUB_SHA}"
