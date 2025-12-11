@@ -14,7 +14,7 @@ LDFLAGS := -X $(PKG_PREFIX).Version=$(VERSION) \
 
 # --- Targets ---
 
-.PHONY: build build-multiarch install
+.PHONY: build build-multiarch clean install
 
 build:
 	go build -v -ldflags "$(LDFLAGS)" -o $(APP_NAME)
@@ -27,8 +27,11 @@ build-multiarch:
 		go_arch=$${plat#*/}; \
 		output="jira-$${go_os}-$${go_arch}.tar.gz"; \
 		GOOS=$${go_os} GOARCH=$${go_arch} go build -v -ldflags "$(LDFLAGS)" -o "dist/$(APP_NAME)"; \
-		tar -czvf "dist/$$output" "dist/$(APP_NAME)" && rm "dist/$(APP_NAME)"; \
+		tar -czvf "dist/$$output" -C dist "$(APP_NAME)" && rm "dist/$(APP_NAME)"; \
 	done
+
+clean:
+	rm dist/*
 
 install: build
 	mv $(APP_NAME) "$(GO_PATH)/bin"
