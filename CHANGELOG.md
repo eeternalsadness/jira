@@ -2,34 +2,47 @@
 
 All notable changes to this project will be documented in this file.
 
+## [v0.2.4] - 2025-12-11
+
+### Fixed
+
+- Fixed `jira version` not comparing versions correctly
+
 ## [v0.2.3] - 2025-12-06
 
 ### Added
+
 - `jira version` to show current version, Go version, and git commit SHA
 
 ### Changed
+
 - **BREAKING**: Removed `--version` and `-v` options
 - Removed automatic version check. Moved to on-demand version check with `jira version`
 
 ## [v0.2.2] - 2025-12-04
 
 ### Added
+
 - Headers added to selection lists for improved clarity
 
 ### Changed
+
 - **BREAKING**: Configuration file format changed from CamelCase to kebab-case keys (e.g., `Domain` → `domain`, `ProjectIDs` → `project-ids`, `IssueTypeIDs` → `issue-type-ids`, `DefaultProjectID` → `default-project-id`, `DefaultIssueTypeID` → `default-issue-type-id`)
 
 ## [v0.2.1] - 2025-12-03
 
 ### Fixed
+
 - Fixed off-by-one error in issue transition selection causing incorrect transition to be applied
 
 ## [v0.2.0] - 2025-12-03
 
 ### Added
+
 - Interactive configuration selection in `jira configure` command
 
 ### Changed
+
 - **BREAKING**: Command structure changed from `jira get issue` to `jira issue get`
 - **BREAKING**: Command structure changed from `jira create issue` to `jira issue create`
 - **BREAKING**: Command structure changed from `jira transition issue` to `jira issue transition`
@@ -39,6 +52,7 @@ All notable changes to this project will be documented in this file.
 ## [v0.1.7] - 2025-11-28
 
 ### Added
+
 - Support for multiple projects and issue types configuration
 - `jira configure projects` command to configure available project IDs  
 - `jira configure issueTypes` command to configure available issue types
@@ -50,4 +64,5 @@ All notable changes to this project will be documented in this file.
 ## [v0.1.6]
 
 ### Added
+
 - Automatic version check
