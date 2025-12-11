@@ -1,5 +1,5 @@
 name: Publish Module
-run-name: Publish ${{ github.ref }}
+run-name: Publish ${{ github.ref_name }}
 
 on:
   workflow_call:
@@ -67,6 +67,4 @@ jobs:
           prerelease: false
           token: ${{ secrets.release-token }}
           make_latest: "true"
-          files: |
-            jira-*-*
-            !jira-api-call.sh
+          files: dist/*

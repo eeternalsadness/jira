@@ -10,7 +10,6 @@ jobs:
   build:
     uses: "./.github/workflows/build-module.yaml"
     with:
-      app-version: ${{ github.ref_name }}
       go-version: "1.23.x"
 
   publish:
