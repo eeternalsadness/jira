@@ -26,86 +26,33 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"os"
-	"strconv"
-	"time"
 
 	"github.com/spf13/cobra"
 )
 
 // TODO: determine what goes into the config file and what doesn't
 const (
-	checkVersionInterval = 10 * time.Minute
-	tmpDir               = "/tmp/jira-cobra"
-	githubEndpoint       = "https://api.github.com/repos/eeternalsadness/jira/releases/latest"
+	githubEndpoint = "https://api.github.com/repos/eeternalsadness/jira/releases/latest"
 )
 
 // NOTE: inject these in the build process with -ldflags
 var (
 	Version      string
-	GoVersion    string
 	GitCommitSHA string
 )
 
 func CheckVersion(cmd *cobra.Command) error {
-	// only check every once in a while
-	// lastCheckVersionTime, err := getLastCheckVersionTime()
-	// if err != nil {
-	// 	return err
-	// }
-
-	// still within version check cooldown, do nothing
-	// if time.Since(lastCheckVersionTime) < checkVersionInterval {
-	// 	return nil
-	// }
-
 	latestVersion, err := getLatestVersion()
 	if err != nil {
 		return err
 	}
 
-	// if err := updateLastCheckVersionTime(); err != nil {
-	// 	return err
-	// }
-
-	if latestVersion != cmd.Root().Version {
+	if latestVersion != Version {
 		// TODO: potentially add an update command instead of telling the user to update manually
 		fmt.Printf("\n\033[33mVersion '%s' is available. To update to the latest version, run:\n  go install github.com/eeternalsadness/jira@latest\033[0m\n", latestVersion)
 	}
 
 	return nil
-}
-
-func getLastCheckVersionTime() (time.Time, error) {
-	tmpFilePath := fmt.Sprintf("%s/lastCheckVersionTime", tmpDir)
-	data, err := os.ReadFile(tmpFilePath)
-	if err != nil {
-		if !os.IsNotExist(err) {
-			return time.Time{}, fmt.Errorf("failed to read check version time file at '%s': %w", tmpFilePath, err)
-		} else {
-			return time.Unix(0, 0), nil
-		}
-	}
-
-	checkVersionTime, err := strconv.ParseInt(string(data), 10, 64)
-	if err != nil {
-		return time.Time{}, fmt.Errorf("failed to parse time from file: %w", err)
-	}
-
-	return time.Unix(checkVersionTime, 0), nil
-}
-
-func updateLastCheckVersionTime() error {
-	// make sure tmp dir is set up
-	if err := os.MkdirAll(tmpDir, 0o755); err != nil {
-		return err
-	}
-
-	// write to file
-	// TODO: maybe put this in the config file
-	tmpFilePath := fmt.Sprintf("%s/lastCheckVersionTime", tmpDir)
-	err := os.WriteFile(tmpFilePath, []byte(strconv.FormatInt(time.Now().Unix(), 10)), 0o755)
-	return err
 }
 
 func getLatestVersion() (string, error) {

@@ -23,6 +23,7 @@ package version
 
 import (
 	"fmt"
+	"runtime/debug"
 
 	"github.com/eeternalsadness/jira/internal/util"
 	"github.com/spf13/cobra"
@@ -38,8 +39,13 @@ func NewCommand() *cobra.Command {
 			return nil
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {
+			buildInfo, ok := debug.ReadBuildInfo()
+			if !ok {
+				panic("failed to read Go version from build info")
+			}
+
 			fmt.Printf("%s version %s\n", cmd.Root().Name(), util.Version)
-			fmt.Printf("Go version: %s\n", util.GoVersion)
+			fmt.Printf("Go version: %s\n", buildInfo.GoVersion)
 			fmt.Printf("Git commit SHA: %s\n", util.GitCommitSHA)
 			return util.CheckVersion(cmd)
 		},
