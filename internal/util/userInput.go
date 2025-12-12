@@ -45,14 +45,17 @@ func UserGetString(prompt string, defaultVal *string, isUserInputOnNewLine bool)
 	return &userInput, nil
 }
 
+// NOTE: this is basically UserGetBool(), but standardized
 func UserYesNo(prompt string) (bool, error) {
-	reader := bufio.NewReader(os.Stdin)
+	userInput, err := UserGetString(
+		fmt.Sprintf("%s [y/n]: ", prompt),
+		nil,
+		false)
+	if err != nil {
+		return false, err
+	}
 
-	fmt.Printf("%s [y/n]: ", prompt)
-	userInput, _ := reader.ReadString('\n')
-	userInput = userInput[:len(userInput)-1]
-
-	switch userInput {
+	switch *userInput {
 	case "y":
 		return true, nil
 	case "n":
