@@ -12,46 +12,6 @@ import (
 
 var ErrUserQuit = errors.New("")
 
-func UserGetInt(prompt string, defaultVal *int, hasQuitOption bool) (*int, error) {
-	userInput, err := UserGetString(prompt, nil, hasQuitOption)
-	if err != nil {
-		return nil, err
-	}
-
-	// empty user input, use defaultVal
-	if *userInput == "" && defaultVal != nil {
-		return defaultVal, nil
-	}
-
-	if userInputInt, err := strconv.Atoi(*userInput); err != nil {
-		return nil, err
-	} else {
-		return &userInputInt, nil
-	}
-}
-
-func UserGetString(prompt string, defaultVal *string, hasQuitOption bool) (*string, error) {
-	fmt.Print(prompt)
-
-	reader := bufio.NewReader(os.Stdin)
-	userInput, err := reader.ReadString('\n')
-	if err != nil && errors.Is(err, io.EOF) {
-		return nil, err
-	}
-	userInput = strings.TrimSpace(userInput)
-
-	// user quits
-	if hasQuitOption && userInput == "q" {
-		return nil, ErrUserQuit
-	}
-
-	if userInput == "" && defaultVal != nil {
-		return defaultVal, nil
-	}
-
-	return &userInput, nil
-}
-
 // NOTE: this is basically UserGetBool(), but standardized
 func UserYesNo(prompt string) (bool, error) {
 	userInput, err := UserGetString(
@@ -91,4 +51,44 @@ func UserSelectFromRange(max int) (int, error) {
 	}
 
 	return *index - 1, nil
+}
+
+func UserGetInt(prompt string, defaultVal *int, hasQuitOption bool) (*int, error) {
+	userInput, err := UserGetString(prompt, nil, hasQuitOption)
+	if err != nil {
+		return nil, err
+	}
+
+	// empty user input, use defaultVal
+	if *userInput == "" && defaultVal != nil {
+		return defaultVal, nil
+	}
+
+	if userInputInt, err := strconv.Atoi(*userInput); err != nil {
+		return nil, err
+	} else {
+		return &userInputInt, nil
+	}
+}
+
+func UserGetString(prompt string, defaultVal *string, hasQuitOption bool) (*string, error) {
+	fmt.Print(prompt)
+
+	reader := bufio.NewReader(os.Stdin)
+	userInput, err := reader.ReadString('\n')
+	if err != nil && errors.Is(err, io.EOF) {
+		return nil, err
+	}
+	userInput = strings.TrimSpace(userInput)
+
+	// user quits
+	if hasQuitOption && userInput == "q" {
+		return nil, ErrUserQuit
+	}
+
+	if userInput == "" && defaultVal != nil {
+		return defaultVal, nil
+	}
+
+	return &userInput, nil
 }
