@@ -10,8 +10,10 @@ import (
 	"strings"
 )
 
-func UserGetInt(prompt string, defaultVal *int, isUserInputOnNewLine bool) (*int, error) {
-	userInput, err := UserGetString(prompt, nil, isUserInputOnNewLine)
+var ErrUserQuit = errors.New("")
+
+func UserGetInt(prompt string, defaultVal *int, hasQuitOption bool) (*int, error) {
+	userInput, err := UserGetString(prompt, nil, hasQuitOption)
 	if err != nil {
 		return nil, err
 	}
@@ -28,8 +30,8 @@ func UserGetInt(prompt string, defaultVal *int, isUserInputOnNewLine bool) (*int
 	}
 }
 
-func UserGetString(prompt string, defaultVal *string, isUserInputOnNewLine bool) (*string, error) {
-	printPrompt(prompt, isUserInputOnNewLine)
+func UserGetString(prompt string, defaultVal *string, hasQuitOption bool) (*string, error) {
+	fmt.Print(prompt)
 
 	reader := bufio.NewReader(os.Stdin)
 	userInput, err := reader.ReadString('\n')
@@ -37,6 +39,11 @@ func UserGetString(prompt string, defaultVal *string, isUserInputOnNewLine bool)
 		return nil, err
 	}
 	userInput = strings.TrimSpace(userInput)
+
+	// user quits
+	if hasQuitOption && userInput == "q" {
+		return nil, ErrUserQuit
+	}
 
 	if userInput == "" && defaultVal != nil {
 		return defaultVal, nil
@@ -70,38 +77,18 @@ func UserSelectFromRange(max int) (int, error) {
 		panic("max must be >= 1!")
 	}
 
-	// prompt for input
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Printf("\nSelect an option [1 - %d, or 'q' to quit]: ", max)
-	inputStr, err := reader.ReadString('\n')
-	if err != nil {
-		return -1, err
-	}
-	inputStr = inputStr[:len(inputStr)-1]
-
-	// quit if user types 'q'
-	if inputStr == "q" {
-		return -1, nil
-	}
-
-	// check number value
-	index, err := strconv.Atoi(inputStr)
+	index, err := UserGetInt(
+		fmt.Sprintf("\nSelect an option [1 - %d, or 'q' to quit]: ", max),
+		nil,
+		true)
 	if err != nil {
 		return -1, err
 	}
 
 	// check if index value is valid
-	if index <= 0 || index > max {
+	if *index < 1 || *index > max {
 		return -1, fmt.Errorf("you must choose a number between 1 and %d (inclusive)", max)
 	}
 
-	return index - 1, nil
-}
-
-func printPrompt(prompt string, isUserInputOnNewLine bool) {
-	if isUserInputOnNewLine {
-		fmt.Println(prompt)
-	} else {
-		fmt.Print(prompt)
-	}
+	return *index - 1, nil
 }
