@@ -92,12 +92,11 @@ func selectTransition(transitions []jira.Transition) (jira.Transition, error) {
 
 	transitionIndex, err := util.UserSelectFromRange(len(transitions))
 	if err != nil {
-		return jira.Transition{}, err
-	}
-
-	// user quits
-	if transitionIndex == -1 {
-		return jira.Transition{}, nil
+		if err == util.ErrUserQuit {
+			return jira.Transition{}, nil
+		} else {
+			return jira.Transition{}, err
+		}
 	}
 
 	return transitions[transitionIndex], nil

@@ -70,12 +70,11 @@ func selectConfigOption() (string, error) {
 
 	index, err := util.UserSelectFromRange(len(configurationOptions))
 	if err != nil {
-		return "", err
-	}
-
-	// user quits
-	if index == -1 {
-		return "", nil
+		if err == util.ErrUserQuit {
+			return "", nil
+		} else {
+			return "", err
+		}
 	}
 
 	return configurationOptions[index], nil
