@@ -17,11 +17,13 @@ LDFLAGS := -X $(PKG_PREFIX).Version=$(VERSION) \
 .PHONY: build build-multiarch clean install
 
 build:
+	go mod tidy
 	go build -v -ldflags "$(LDFLAGS)" -o $(APP_NAME)
 
 build-multiarch:
 	[[ ! -d dist ]] && mkdir dist; \
 	platforms="linux/amd64 linux/arm64 darwin/arm64"; \
+	go mod tidy
 	for plat in $$platforms; do \
 		go_os=$${plat%/*}; \
 		go_arch=$${plat#*/}; \
