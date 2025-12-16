@@ -22,7 +22,7 @@ func ViperUpsertString(key string, prompt string, defaultVal *string, sensitive 
 
 	if defaultVal != nil {
 		if sensitive {
-			fmt.Printf("%s [%s]: ", prompt, sensorString(*defaultVal))
+			fmt.Printf("%s [%s]: ", prompt, SensorString(*defaultVal))
 		} else {
 			fmt.Printf("%s [%s]: ", prompt, *defaultVal)
 		}
@@ -76,7 +76,7 @@ func ViperUpsertInt(key string, prompt string, defaultVal *int) error {
 	return nil
 }
 
-func sensorString(str string) string {
+func SensorString(str string) string {
 	// otherwise show the first and last 25% chars (max 4)
 	charsToShow := len(str) / 4
 	charsToShow = min(charsToShow, 4)

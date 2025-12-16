@@ -9,38 +9,53 @@ import (
 
 func configureCredentials() error {
 	// configure jira domain
-	example := "example.atlassian.net"
-	err := util.ViperUpsertString(
-		"domain",
-		"Enter the Jira domain",
-		&example,
+	defaultDomain := "example.atlassian.net"
+	domainKey := "domain"
+
+	// if there is an existing value, use it as the default domain
+	if viper.IsSet(domainKey) {
+		defaultDomain = viper.GetString(domainKey)
+	}
+
+	domain, err := util.UserGetString(
+		fmt.Sprintf("Enter the Jira domain [%s]", defaultDomain),
+		&defaultDomain,
 		false)
 	if err != nil {
-		return fmt.Errorf("failed to configure Jira domain: %s", err)
+		return err
 	}
 
 	// configure jira email
-	example = "example@example.com"
-	err = util.ViperUpsertString(
-		"email",
-		"Enter the email address used for Jira",
-		&example,
+	defaultEmail := "example@example.com"
+	emailKey := "email"
+	if viper.IsSet(emailKey) {
+		defaultEmail = viper.GetString(emailKey)
+	}
+	email, err := util.UserGetString(
+		fmt.Sprintf("Enter the email address used for Jira [%s]", defaultEmail),
+		&defaultEmail,
 		false)
 	if err != nil {
-		return fmt.Errorf("failed to configure Jira email: %s", err)
+		return err
 	}
 
 	// configure jira api token
-	err = util.ViperUpsertString(
-		"token",
-		"Enter the Jira API token",
-		nil,
-		true)
+	defaultToken := "example.atlassian.net"
+	defaultTokenSensored := defaultToken
+	tokenKey := "token"
+	if viper.IsSet(tokenKey) {
+		defaultToken = viper.GetString(tokenKey)
+		defaultTokenSensored = util.SensorString(defaultToken)
+	}
+	token, err := util.UserGetString(
+		fmt.Sprintf("Enter the Jira API token [%s]", defaultTokenSensored),
+		&defaultToken,
+		false)
 	if err != nil {
-		return fmt.Errorf("failed to configure Jira API token: %s", err)
+		return err
 	}
 
-	if err := viper.WriteConfig(); err != nil {
+	if err := util.ConfigJiraCredentials(domain, email, token); err != nil {
 		return err
 	}
 
