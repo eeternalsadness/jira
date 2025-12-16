@@ -60,3 +60,25 @@ func InitJiraConfig() (jira.Jira, error) {
 
 	return jiraClient, nil
 }
+
+func ConfigJiraCredentials(domain *string, email *string, token *string) error {
+	if domain == nil {
+		panic("domain is nil")
+	}
+	if email == nil {
+		panic("email is nil")
+	}
+	if token == nil {
+		panic("token is nil")
+	}
+
+	viper.Set("domain", *domain)
+	viper.Set("email", *email)
+	viper.Set("token", *token)
+
+	if err := viper.WriteConfig(); err != nil {
+		return err
+	}
+
+	return nil
+}
