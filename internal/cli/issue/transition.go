@@ -35,11 +35,6 @@ func newTransitionCommand() *cobra.Command {
 		Short: "Transition a Jira issue",
 		Long:  `Transition a Jira issue using the issue ID. The user is prompted to select a transition from a list of valid transitions for the issue.`,
 		Args:  cobra.ExactArgs(1),
-		Example: `# Create a Jira issue with the default project and issue type
-jira issue create
-
-# Create a Jira issue with a specific project and issue type
-jira issue create --project-id 123 --issue-type-id 456`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			cmd.SilenceUsage = true
 
