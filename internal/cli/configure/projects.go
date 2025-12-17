@@ -11,6 +11,7 @@ import (
 	"github.com/spf13/viper"
 )
 
+// TODO: make the user search for projects using keys instead
 func configureProjects() error {
 	reader := bufio.NewReader(os.Stdin)
 
