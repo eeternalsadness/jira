@@ -18,7 +18,7 @@ func configureCredentials() error {
 	}
 
 	domain, err := util.UserGetString(
-		fmt.Sprintf("Enter the Jira domain [%s]", defaultDomain),
+		fmt.Sprintf("Enter the Jira domain [%s]: ", defaultDomain),
 		&defaultDomain,
 		false)
 	if err != nil {
@@ -32,7 +32,7 @@ func configureCredentials() error {
 		defaultEmail = viper.GetString(emailKey)
 	}
 	email, err := util.UserGetString(
-		fmt.Sprintf("Enter the email address used for Jira [%s]", defaultEmail),
+		fmt.Sprintf("Enter the email address used for Jira [%s]: ", defaultEmail),
 		&defaultEmail,
 		false)
 	if err != nil {
@@ -48,7 +48,7 @@ func configureCredentials() error {
 		defaultTokenSensored = util.SensorString(defaultToken)
 	}
 	token, err := util.UserGetString(
-		fmt.Sprintf("Enter the Jira API token [%s]", defaultTokenSensored),
+		fmt.Sprintf("Enter the Jira API token [%s]: ", defaultTokenSensored),
 		&defaultToken,
 		false)
 	if err != nil {
