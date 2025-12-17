@@ -30,8 +30,8 @@ import (
 
 var configurationOptions = []string{
 	"Credentials",
-	"Issue types",
-	"Projects",
+	"Default issue type",
+	"Default project",
 }
 
 // NewCommand creates and returns the issue command
@@ -48,9 +48,9 @@ func NewCommand() *cobra.Command {
 			switch configurationOption {
 			case "Credentials":
 				return configureCredentials()
-			case "Issue types":
+			case "Default issue type":
 				return configureDefaultIssueType()
-			case "Projects":
+			case "Default project":
 				return configureDefaultProject()
 			default:
 				return fmt.Errorf("invalid configuration option: %s", configurationOption)
