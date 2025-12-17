@@ -49,7 +49,7 @@ func NewCommand() *cobra.Command {
 			case "Credentials":
 				return configureCredentials()
 			case "Issue types":
-				return configureIssueTypes()
+				return configureDefaultIssueType()
 			case "Projects":
 				return configureProjects()
 			default:
@@ -70,11 +70,7 @@ func selectConfigOption() (string, error) {
 
 	index, err := util.UserSelectFromRange(len(configurationOptions))
 	if err != nil {
-		if err == util.ErrUserQuit {
-			return "", nil
-		} else {
-			return "", err
-		}
+		return "", err
 	}
 
 	return configurationOptions[index], nil

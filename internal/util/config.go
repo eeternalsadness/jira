@@ -76,9 +76,5 @@ func ConfigJiraCredentials(domain *string, email *string, token *string) error {
 	viper.Set("email", *email)
 	viper.Set("token", *token)
 
-	if err := viper.WriteConfig(); err != nil {
-		return err
-	}
-
-	return nil
+	return viper.WriteConfig()
 }
