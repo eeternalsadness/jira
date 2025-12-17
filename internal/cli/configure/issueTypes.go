@@ -9,12 +9,11 @@ import (
 
 // TODO: make the user search for default issue type using name instead
 func configureDefaultIssueType() error {
-	// configure default issue type
 	var defaultVal *string = nil
 	defaultValStr := ""
 	defaultIssueTypeIDKey := "default_issue_type_id"
 
-	// if there is an existing value, use it as the default domain
+	// if there is an existing value, use it as the default issue type ID
 	if viper.IsSet(defaultIssueTypeIDKey) {
 		*defaultVal = viper.GetString(defaultIssueTypeIDKey)
 		defaultValStr = fmt.Sprintf(" [%s]", *defaultVal)
