@@ -27,6 +27,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/eeternalsadness/jira/internal/util"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -49,11 +50,11 @@ jira issue create
 jira issue create --project-id 123 --issue-type-id 456`,
 		PreRun: func(cmd *cobra.Command, args []string) {
 			if projectID == "" {
-				projectID = viper.GetString("default_project_id")
+				projectID = viper.GetString(string(util.DefaultProjectIDKey))
 			}
 
 			if issueTypeID == "" {
-				issueTypeID = viper.GetString("default_issue_type_id")
+				issueTypeID = viper.GetString(string(util.DefaultIssueTypeIDKey))
 			}
 		},
 		RunE: func(cmd *cobra.Command, args []string) error {

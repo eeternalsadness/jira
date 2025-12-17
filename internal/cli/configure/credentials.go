@@ -10,7 +10,7 @@ import (
 func configureCredentials() error {
 	// configure jira domain
 	defaultDomain := "example.atlassian.net"
-	domainKey := "domain"
+	domainKey := string(util.JiraDomainKey)
 
 	// if there is an existing value, use it as the default domain
 	if viper.IsSet(domainKey) {
@@ -27,7 +27,7 @@ func configureCredentials() error {
 
 	// configure jira email
 	defaultEmail := "example@example.com"
-	emailKey := "email"
+	emailKey := string(util.JiraEmailKey)
 	if viper.IsSet(emailKey) {
 		defaultEmail = viper.GetString(emailKey)
 	}
@@ -42,7 +42,7 @@ func configureCredentials() error {
 	// configure jira api token
 	defaultToken := "example.atlassian.net"
 	defaultTokenSensored := defaultToken
-	tokenKey := "token"
+	tokenKey := string(util.JiraTokenKey)
 	if viper.IsSet(tokenKey) {
 		defaultToken = viper.GetString(tokenKey)
 		defaultTokenSensored = util.SensorString(defaultToken)
