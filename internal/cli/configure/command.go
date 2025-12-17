@@ -51,7 +51,7 @@ func NewCommand() *cobra.Command {
 			case "Issue types":
 				return configureDefaultIssueType()
 			case "Projects":
-				return configureProjects()
+				return configureDefaultProject()
 			default:
 				return fmt.Errorf("invalid configuration option: %s", configurationOption)
 			}
