@@ -55,9 +55,5 @@ func configureCredentials() error {
 		return err
 	}
 
-	if err := util.ConfigJiraCredentials(domain, email, token); err != nil {
-		return err
-	}
-
-	return nil
+	return util.ConfigJiraCredentials(domain, email, token)
 }
