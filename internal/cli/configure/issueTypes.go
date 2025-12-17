@@ -1,67 +1,34 @@
 package configure
 
 import (
-	"bufio"
 	"fmt"
-	"os"
-	"strconv"
-	"strings"
 
 	"github.com/eeternalsadness/jira/internal/util"
 	"github.com/spf13/viper"
 )
 
-// TODO: make the user search for issue types using names instead
-func configureIssueTypes() error {
-	reader := bufio.NewReader(os.Stdin)
+// TODO: make the user search for default issue type using name instead
+func configureDefaultIssueType() error {
+	// configure default issue type
+	var defaultVal *string = nil
+	defaultValStr := ""
+	defaultIssueTypeIDKey := "default_issue_type_id"
 
-	// get current project ids
-	issueTypeIDs := viper.GetIntSlice("issue-type-ids")
-	fmt.Println("Current issue type IDs:")
-	fmt.Println(issueTypeIDs)
-
-	fmt.Print("Enter the new list of issue type IDs (separate by commas): ")
-	userInput, _ := reader.ReadString('\n')
-	userInput = userInput[:len(userInput)-1]
-	userInputSlice := strings.Split(userInput, ",")
-
-	// parse issue type ids
-	var issueTypeIDsNew []int
-	for i := range userInputSlice {
-		issueTypeIDString := strings.TrimSpace(userInputSlice[i])
-		issueTypeIDInt, err := strconv.Atoi(issueTypeIDString)
-		if err != nil {
-			return fmt.Errorf("invalid project ID: %s", issueTypeIDString)
-		}
-		issueTypeIDsNew = append(issueTypeIDsNew, issueTypeIDInt)
+	// if there is an existing value, use it as the default domain
+	if viper.IsSet(defaultIssueTypeIDKey) {
+		*defaultVal = viper.GetString(defaultIssueTypeIDKey)
+		defaultValStr = fmt.Sprintf(" [%s]", *defaultVal)
 	}
 
-	if len(issueTypeIDs) > 0 {
-		overwrite, err := util.UserYesNo("Overwrite existing issue type IDs?")
-		if err != nil {
-			return err
-		}
-
-		if overwrite {
-			viper.Set("issue-type-ids", issueTypeIDsNew)
-		}
-	} else {
-		viper.Set("issue-type-ids", issueTypeIDsNew)
+	defaultIssueTypeID, err := util.UserGetString(
+		fmt.Sprintf("Enter the default issue type ID%s: ", defaultValStr),
+		defaultVal,
+		false)
+	if err != nil {
+		return err
 	}
 
-	// set default issue type ID
-	issueTypeIDs = viper.GetIntSlice("issue-type-ids")
-	if len(issueTypeIDs) > 0 {
-		// default to first issue type ID
-		defaultIssueTypeID := issueTypeIDs[0]
-		err := util.ViperUpsertInt(
-			"default-issue-type-id",
-			"Enter the default issue type ID",
-			&defaultIssueTypeID)
-		if err != nil {
-			return err
-		}
-	}
+	viper.Set(defaultIssueTypeIDKey, *defaultIssueTypeID)
 
 	return viper.WriteConfig()
 }
